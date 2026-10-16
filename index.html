@@ -745,10 +745,44 @@ h3{font-size:13px;margin:16px 0 8px;color:var(--muted);text-transform:uppercase;
 .card .t{font-weight:600;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .card .m{font-size:13px;color:var(--muted);margin-top:3px}
 .card .grow{flex:1;min-width:0}
+.card{position:relative;overflow:hidden;padding-left:18px}
+.card .sw{position:absolute;left:0;top:0;bottom:0;width:7px}
+.card.sel{border-color:var(--c,var(--track));box-shadow:0 0 0 2px color-mix(in srgb,var(--c,var(--track)) 40%,transparent)}
 .card .badge{font-size:11px;font-weight:700;padding:3px 7px;border-radius:999px;background:var(--panel2);color:var(--muted);flex:none}
 .badge.off{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
 .g-easy{color:var(--ok)}.g-moderate{color:var(--warn)}.g-difficult{color:var(--danger)}
 
+/* detail extras */
+.desc{font-size:14px;line-height:1.5;white-space:pre-line;margin:0}
+.desc.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:600;padding:4px 0;cursor:pointer}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font-size:12px;padding:4px 9px;border-radius:999px;background:var(--panel2);color:var(--muted);font-weight:600}
+.photos{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;margin:0 -16px;padding-left:16px;padding-right:16px}
+.photos button{flex:none;width:132px;height:96px;border:0;padding:0;border-radius:10px;overflow:hidden;background:var(--panel2);scroll-snap-align:start;cursor:pointer}
+.photos img{width:100%;height:100%;object-fit:cover;display:block}
+.sfbar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:6px 0 4px}
+.sfleg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
+.sfleg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.hl{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:10px 0;cursor:pointer}
+.hl:last-child{border-bottom:0}
+.hl .n{flex:none;width:24px;height:24px;border-radius:50%;color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;margin-top:2px}
+.hl .th{flex:none;width:64px;height:48px;border-radius:8px;object-fit:cover;background:var(--panel2)}
+.hl .grow{flex:1;min-width:0}
+.hl .t{font-weight:600;font-size:14px;line-height:1.3}
+.hl .m{font-size:12.5px;color:var(--muted);margin-top:2px}
+.hl .tips{font-size:13px;margin-top:6px;color:var(--ink)}
+.hl .tips p{margin:4px 0;padding-left:8px;border-left:2px solid var(--line)}
+.hlpin{width:22px;height:22px;border-radius:50%;border:2px solid #fff;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.45)}
+.campin{width:18px;height:18px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.45)}
+.campin svg{width:12px;height:12px;color:#1d2420}
+.lightbox{position:fixed;inset:0;z-index:3500;background:rgba(0,0,0,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(var(--st) + 48px) 0 calc(var(--sb) + 64px)}
+.lightbox img{max-width:100%;max-height:100%;object-fit:contain}
+.lightbox .cap{position:absolute;left:0;right:0;bottom:calc(var(--sb) + 14px);color:#ddd;text-align:center;font-size:13px;padding:0 60px}
+.lightbox .lbx{position:absolute;top:calc(var(--st) + 8px);right:8px}
+.lightbox .lbp,.lightbox .lbn{position:absolute;top:50%;transform:translateY(-50%)}
+.lightbox .lbp{left:6px}.lightbox .lbn{right:6px}
+.lightbox .iconbtn{background:rgba(255,255,255,.12);color:#fff;width:44px;height:44px}
 /* detail */
 .dhead{display:flex;gap:8px;align-items:flex-start;margin-bottom:10px}
 .iconbtn{width:38px;height:38px;border-radius:10px;border:0;background:var(--panel2);display:grid;place-items:center;flex:none;cursor:pointer}
@@ -841,6 +875,13 @@ h3{font-size:13px;margin:16px 0 8px;color:var(--muted);text-transform:uppercase;
   <div class="ps" id="pkSub"></div>
   <div class="pe">Double-tap to wake the screen view</div>
 </div>
+<div class="lightbox hidden" id="lightbox">
+  <img id="lbImg" alt="">
+  <div class="cap" id="lbCap"></div>
+  <button class="iconbtn lbx" data-act="lbClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <button class="iconbtn lbp" data-act="lbPrev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+  <button class="iconbtn lbn" data-act="lbNext" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></button>
+</div>
 <div class="toast" id="toast"></div>
 <input type="file" id="gpxFile" accept=".gpx,application/gpx+xml,application/xml,text/xml" multiple hidden>
 
@@ -869,6 +910,11 @@ const PROVIDERS = {
   osm:{id:'osm',name:'OpenStreetMap',url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',max:19,sub:'',attr:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',kb:20},
   otm:{id:'otm',name:'OpenTopoMap (contour lines)',url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',max:17,sub:'abc',attr:'© OpenStreetMap, SRTM | © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',kb:35},
 };
+// Route colours: high-contrast, map-friendly (no pale yellow/greys), ordered so neighbours differ strongly.
+const PALETTE = ['#e6194b','#4363d8','#f58231','#911eb4','#0f9d58','#f032e6','#00838f','#9a6324','#1a237e','#e8a400',
+  '#c2185b','#2e7d32','#6a1b9a','#ff5722','#0277bd','#827717','#d81b60','#00695c','#5d4037','#3949ab'];
+const TRACK_COLOR = '#e8571a';
+const imgUrl = (src, w, h) => String(src || '').replace('{width}', w).replace('{height}', h).replace('{crop}', 'true');
 const MISSING_TILE = 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#d9d5c9"/><path d="M0 256 256 0M-64 64 64-64M192 320 320 192" stroke="#cbc6b8" stroke-width="2"/></svg>');
 
 const I = { // tiny icon set
@@ -893,6 +939,8 @@ const I = { // tiny icon set
   moon:'<path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z"/>',
   home:'<path d="M3 11 12 4l9 7M5 10v10h14V10"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/>',
+  camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  star:'<path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1 6.2L12 17.4 6.5 20.3l1-6.2L3 9.7l6.2-.9z" fill="currentColor"/>',
   link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
 };
 const ic = (n, extra='') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${I[n]}</svg>`;
@@ -1032,7 +1080,49 @@ async function komootSearch(center, radius, sport, minM, maxM){
   const c = [center.lat, center.lng];
   list.forEach(x => x.from = x.start ? dist(c, x.start) : 1e9);
   list.sort((a, b) => a.from - b.from);
+  list.forEach((x, i) => x.color = PALETTE[i % PALETTE.length]);
   return {list, total};
+}
+function pickLang(orig, origLang, tr, trLang){
+  const ui = (navigator.language || 'en').slice(0, 2).toLowerCase();
+  if(tr && (trLang || '').slice(0, 2).toLowerCase() === ui && (origLang || '').slice(0, 2).toLowerCase() !== ui) return tr;
+  return orig || tr || '';
+}
+function detailsFromKomoot(d){
+  const e = d._embedded || {}, td = e.tour_description, out = {};
+  if(td){
+    out.desc = {text:pickLang(td.text, td.text_language, td.translated_text, td.translated_text_language).trim(),
+      short:pickLang(td.short_description, td.text_language, td.translated_short_description, td.translated_text_language).trim(),
+      attribution:''};
+    const ui = (navigator.language || 'en').slice(0, 2).toLowerCase();
+    if(td.translated_text && out.desc.text === td.translated_text.trim() && (td.text_language || '').slice(0, 2).toLowerCase() !== ui)
+      out.desc.attribution = `Translated${td.attribution ? ' by ' + td.attribution : ''} from ${(td.text_language || '?').toUpperCase()}`;
+    if(!out.desc.text && !out.desc.short) delete out.desc;
+  }
+  out.author = e.creator?.display_name || null;
+  out.rating = d.rating_count ? {score:d.rating_score, count:d.rating_count} : null;
+  out.visitors = d.visitors || null;
+  const clean = (arr, pre) => (arr || []).map(x => ({type:String(x.type || '').replace(pre, '').replace(/_d\d$/, '').replace(/_/g, ' '), amount:x.amount}))
+    .reduce((acc, x) => { const f = acc.find(y => y.type === x.type); if(f) f.amount += x.amount; else acc.push(x); return acc; }, [])
+    .sort((a, b) => b.amount - a.amount);
+  out.surfaces = clean(d.summary?.surfaces, /^sf#/);
+  out.wayTypes = clean(d.summary?.way_types, /^wt#/);
+  out.areas = [...new Set((d.tour_information || []).flatMap(x => (x.segments || []).map(s => s.extra?.name)).filter(Boolean))];
+  out.highlights = [];
+  for(const it of e.timeline?._embedded?.items || []){
+    const r = it._embedded?.reference; if(!r) continue;
+    if(it.type === 'highlight'){
+      const imgs = r._embedded?.images?._embedded?.items || [];
+      const p = r.mid_point || r.start_point;
+      out.highlights.push({kind:'highlight', id:r.id, name:r.name || r.base_name || 'Highlight', intro:r.short_intro || '',
+        cat:(r.category || '').replace(/_/g, ' '), i:it.index, ll:p ? [p.lat, p.lng] : null,
+        imgs:imgs.slice(0, 4).map(x => x.src).filter(Boolean)});
+    } else if(it.type === 'poi' && r.name){
+      out.highlights.push({kind:'poi', id:r.id, name:r.name, intro:(r.details || []).map(x => x.formatted).filter(Boolean).join(' · '),
+        cat:'', i:it.index, ll:r.location ? [r.location.lat, r.location.lng] : null, imgs:(r.images || []).map(x => x.src).filter(Boolean).slice(0, 2)});
+    }
+  }
+  return out;
 }
 function trackFromKomoot(d, kind, id){
   const coords = d._embedded?.coordinates?.items || d.items || [];
@@ -1041,11 +1131,38 @@ function trackFromKomoot(d, kind, id){
     id:'k'+id, source:'komoot', komootId:String(id), kind, name:d.name || 'Komoot tour', sport:d.sport,
     distance:d.distance, duration:d.duration, up:d.elevation_up != null ? Math.round(d.elevation_up) : null,
     down:d.elevation_down != null ? Math.round(d.elevation_down) : null, grade:d.difficulty?.grade,
-    pts:coords.map(c => [c.lat, c.lng, c.alt ?? null]), dirs: dirs.length ? dirs : null, created:Date.now()
+    pts:coords.map(c => [c.lat, c.lng, c.alt ?? null]), dirs: dirs.length ? dirs : null, created:Date.now(),
+    ...detailsFromKomoot(d), photos:[]
   });
 }
+async function fetchGallery(t){
+  // Community photos along the route (the API serves 5; paging is ignored) plus highlight photos.
+  const photos = [];
+  if(t.kind !== 'tour'){
+    try{
+      const g = await kget(`/discover_tours/${encodeURIComponent(t.komootId)}/gallery/?filter=all&shuffle=false&shuffle_highlight_images=false`);
+      for(const x of g._embedded?.items || []) photos.push({src:x.src, by:x._embedded?.creator?.display_name || '', ll:x.location ? [x.location.lat, x.location.lng] : null});
+    }catch{}
+  } else {
+    try{
+      const g = await kget(`/tours/${encodeURIComponent(t.komootId)}/cover_images/`);
+      for(const x of g._embedded?.items || []) photos.push({src:x.src, by:'', ll:x.location ? [x.location.lat, x.location.lng] : null});
+    }catch{}
+  }
+  for(const h of t.highlights || []) for(const src of h.imgs || []) photos.push({src, by:'', ll:h.ll, hl:h.name});
+  const seen = new Set();
+  return photos.filter(p => p.src && !seen.has(p.src) && seen.add(p.src));
+}
+async function fetchTips(h){
+  if(h.kind !== 'highlight' || h.tips) return h.tips || [];
+  try{
+    const d = await kget(`/highlights/${h.id}/tips/`);
+    h.tips = (d._embedded?.items || []).map(x => pickLang(x.text, x.text_language, x.translated_text, x.translated_text_language)).filter(Boolean).slice(0, 4);
+  }catch{ h.tips = []; }
+  return h.tips;
+}
 async function fetchDiscoverTour(id){
-  const d = await kget(`/discover_tours/${encodeURIComponent(id)}?_embedded=coordinates,directions`);
+  const d = await kget(`/discover_tours/${encodeURIComponent(id)}?_embedded=coordinates,directions,timeline`);
   return trackFromKomoot(d, 'smarttour', id);
 }
 async function fetchUserTour(id){
@@ -1264,9 +1381,10 @@ function renderExplore(){
     settings[{fSport:'sport', fMin:'minKm', fMax:'maxKm'}[id]] = id === 'fSport' ? e.target.value : +e.target.value; saveSettings(); });
 }
 function cardHTML(r){
-  return `<button class="card ${S.sel === r.id ? 'sel' : ''}" data-act="open" data-id="${esc(r.id)}">
+  return `<button class="card ${S.sel === r.id ? 'sel' : ''}" style="--c:${r.color}" data-act="open" data-id="${esc(r.id)}">
+    <span class="sw" style="background:${r.color}"></span>
     <div class="grow"><div class="t">${esc(r.name)}</div>
-    <div class="m">${fmtKm(r.distance)} · ${fmtDur(r.duration)} · ↑${Math.round(r.up || 0)} m${r.from < 1e8 ? ` · ${fmtKm(r.from)} away` : ''}</div></div>
+    <div class="m">${fmtKm(r.distance)} · ${fmtDur(r.duration)} · ↑${Math.round(r.up || 0)} m${r.from < 1e8 ? ` · ${fmtKm(r.from)} away` : ''}${r.ratings ? ` · ★ ${(+r.rating).toFixed(1)}` : ''}</div></div>
     ${r.grade ? `<span class="badge g-${esc(r.grade)}">${esc(r.grade)}</span>` : ''}</button>`;
 }
 async function doSearch(){
@@ -1287,8 +1405,8 @@ function drawResults(){
   for(const r of S.results){
     const g = L.featureGroup();
     if(r.preview){ L.polyline(r.preview, {color:'#fff', weight:7, opacity:.8, interactive:false}).addTo(g);
-      L.polyline(r.preview, {color:'#4f5bd5', weight:4, opacity:.85}).addTo(g); }
-    if(r.start) L.circleMarker(r.start, {radius:6, color:'#fff', weight:2, fillColor:'#4f5bd5', fillOpacity:1}).addTo(g);
+      L.polyline(r.preview, {color:r.color, weight:4, opacity:.9, route:true}).addTo(g); }
+    if(r.start) L.circleMarker(r.start, {radius:7, color:'#fff', weight:2.5, fillColor:r.color, fillOpacity:1}).addTo(g);
     g.on('click', () => openResult(r.id));
     g.addTo(resultsLayer); resultLines.set(r.id, g);
   }
@@ -1297,9 +1415,11 @@ function drawResults(){
 function highlightResult(){
   for(const [id, g] of resultLines){
     const on = id === S.sel, dim = S.sel && !on;
-    g.eachLayer(l => { if(l instanceof L.Polyline && l.options.color !== '#fff') l.setStyle({color:on ? '#e8571a' : '#4f5bd5', opacity:dim ? .35 : .85});
-      else if(l instanceof L.Polyline) l.setStyle({opacity:dim ? .3 : .8});
-      else if(l.setStyle) l.setStyle({fillOpacity:dim ? .4 : 1, opacity:dim ? .4 : 1}); });
+    g.eachLayer(l => {
+      if(l.options.route) l.setStyle({weight:on ? 6 : 4, opacity:dim ? .3 : .9});
+      else if(l instanceof L.Polyline) l.setStyle({weight:on ? 10 : 7, opacity:dim ? .25 : .8});
+      else if(l.setStyle) l.setStyle({fillOpacity:dim ? .35 : 1, opacity:dim ? .35 : 1});
+    });
     if(on) g.bringToFront();
   }
 }
@@ -1307,10 +1427,10 @@ async function openResult(id){
   const r = S.results.find(x => x.id === id); if(!r) return;
   S.sel = id; highlightResult();
   const saved = await dbGet('tracks', 'k'+id);
-  if(saved){ openTrack(prepTrack(saved)); return; }
-  S.current = {loading:true, name:r.name, distance:r.distance, duration:r.duration, up:r.up, grade:r.grade}; show('detail');
+  if(saved){ const st = prepTrack(saved); st.color ||= r.color; openTrack(st); if(!st.photos?.length && st.komootId) loadPhotos(st); return; }
+  S.current = {loading:true, color:r.color, name:r.name, distance:r.distance, duration:r.duration, up:r.up, grade:r.grade}; show('detail');
   if(r.preview) map.fitBounds(L.latLngBounds(r.preview), {paddingTopLeft:[20, 70], paddingBottomRight:[20, sheet.offsetHeight + 20]});
-  try{ openTrack(await fetchDiscoverTour(id), {noFit:true}); }
+  try{ const t = await fetchDiscoverTour(id); t.color = r.color; openTrack(t, {noFit:true}); loadPhotos(t); }
   catch(e){ toast(e.message); show('explore'); }
 }
 
@@ -1319,7 +1439,8 @@ let trackArrowsAt = null;
 function drawTrack(t){
   trackLayer.clearLayers(); if(!t || !t.pts?.length) return;
   L.polyline(t.pts, {color:'#fff', weight:10, opacity:.9, interactive:false}).addTo(trackLayer);
-  L.polyline(t.pts, {color:'#e8571a', weight:6, opacity:1, interactive:false}).addTo(trackLayer);
+  const col = t.color || TRACK_COLOR;
+  L.polyline(t.pts, {color:col, weight:6, opacity:1, interactive:false}).addTo(trackLayer);
   const step = Math.max(250, t.length / 40);           // direction chevrons
   for(let d = step/2; d < t.length; d += step){
     const a = pointAt(t, d), b = pointAt(t, Math.min(t.length, d + 15));
@@ -1328,12 +1449,23 @@ function drawTrack(t){
   const s = t.pts[0], e = t.pts[t.pts.length - 1], loop = dist(s, e) < 80;
   if(!loop) L.marker(e, {interactive:false, icon:L.divIcon({className:'', iconSize:[20, 20], html:'<div class="flag e">■</div>'})}).addTo(trackLayer);
   L.marker(s, {interactive:false, icon:L.divIcon({className:'', iconSize:[20, 20], html:`<div class="flag s">${loop ? '↺' : '▶'}</div>`})}).addTo(trackLayer);
+  (t.highlights || []).filter(h => h.ll).forEach((h, k) => {
+    L.marker(h.ll, {zIndexOffset:500, icon:L.divIcon({className:'', iconSize:[22, 22], html:`<div class="hlpin" style="background:${col}">${k + 1}</div>`})})
+      .on('click', () => focusHighlight(t, k)).addTo(trackLayer);
+  });
+  (t.photos || []).forEach((p, k) => { if(!p.ll || p.hl) return;
+    L.marker(p.ll, {icon:L.divIcon({className:'', iconSize:[18, 18], html:`<div class="campin">${ic('camera')}</div>`})}).on('click', () => openPhoto(k)).addTo(trackLayer); });
 }
 function fitTrack(t){ if(t?.bbox) map.fitBounds([[t.bbox[0], t.bbox[1]], [t.bbox[2], t.bbox[3]]], {paddingTopLeft:[24, 80], paddingBottomRight:[24, sheet.offsetHeight + 24]}); }
 function openTrack(t, opts = {}){
   S.current = t; drawTrack(t);
   if(S.view !== 'nav') show('detail');
   if(!opts.noFit) setTimeout(() => fitTrack(t), 30); else if(S.view === 'detail') fitTrack(t);
+}
+async function loadPhotos(t){
+  t.photos = await fetchGallery(t); t.photosTried = true;
+  if(t.saved) await saveTrack(t);
+  if(S.current === t){ drawTrack(t); if(S.view === 'detail') render(); }
 }
 async function saveTrack(t){ await dbPut('tracks', serial(t)); t.saved = true; }
 async function isSaved(t){ return !!(await dbGet('tracks', t.id)); }
@@ -1366,7 +1498,7 @@ async function renderDetail(){
   if(S.view !== 'detail' || S.current !== t) return;
   const off = t.offline, offOk = off && off.pid;
   const offProv = offOk ? (providerById(off.pid)?.name || off.pid) : '';
-  body.innerHTML = head + stats + profileSVG(t) + `
+  body.innerHTML = head + stats + detailTop(t) + profileSVG(t) + `
     <button class="btn primary block" data-act="nav" style="height:52px;font-size:17px">${ic('play')} Start navigation</button>
     <div class="grid2" style="margin-top:8px">
       <button class="btn" data-act="save">${ic(saved ? 'bookmarked' : 'bookmark')}${saved ? 'Saved' : 'Save'}</button>
@@ -1378,7 +1510,66 @@ async function renderDetail(){
       ${t.komootId ? `<button class="btn" data-act="komoot">${ic('ext')}Komoot</button>` : ''}
       ${saved ? `<button class="btn danger" data-act="delete">${ic('trash')}Delete</button>` : ''}
     </div>
-    <div id="offBox">${offBox(t)}</div>`;
+    <div id="offBox">${offBox(t)}</div>
+    ${detailExtras(t)}`;
+  const more = $('#descMore'); if(more){ const d = $('#descText'); if(d.scrollHeight <= d.clientHeight + 2) more.remove(); }
+}
+const SURF_COL = {asphalt:'#5b6470', paved:'#8e98a6', 'concrete':'#a7b0bc', gravel:'#c9a86a', compacted:'#b8925a', unpaved:'#a0703c',
+  ground:'#7a5a36', nature:'#5f8b4c', grass:'#7cb35b', sand:'#e0c27a', alpine:'#9c8f80', unknown:'#d4d0c6'};
+function detailTop(t){
+  let h = '';
+  const chips = [];
+  if(t.rating) chips.push(`<span class="chip">★ ${(+t.rating.score).toFixed(1)} (${t.rating.count})</span>`);
+  if(t.visitors) chips.push(`<span class="chip">${t.visitors} hiked it</span>`);
+  if(t.author) chips.push(`<span class="chip">by ${esc(t.author)}</span>`);
+  for(const a of t.areas || []) chips.push(`<span class="chip">🌿 ${esc(a)}</span>`);
+  if(chips.length) h += `<div class="meta">${chips.join('')}</div>`;
+  if(t.photos?.length) h += `<div class="photos" style="margin-bottom:8px">${t.photos.map((p, k) =>
+    `<button data-act="photo" data-i="${k}" aria-label="Photo ${k + 1}"><img loading="lazy" src="${esc(imgUrl(p.src, 280, 200))}" alt=""></button>`).join('')}</div>`;
+  else if(t.komootId && navigator.onLine && !t.photosTried) h += `<div class="hint">Loading photos…</div>`;
+  return h;
+}
+function detailExtras(t){
+  let h = '';
+  if(t.desc){
+    h += `<h3>About this route</h3>${t.desc.short && t.desc.text && !t.desc.text.startsWith(t.desc.short.slice(0, 40)) ? `<p class="desc" style="font-weight:600;margin-bottom:6px">${esc(t.desc.short)}</p>` : ''}
+      <p class="desc clamp" id="descText">${esc(t.desc.text || t.desc.short)}</p><button class="linkbtn" id="descMore" data-act="descMore">Read more</button>
+      ${t.desc.attribution ? `<div class="hint">${esc(t.desc.attribution)}</div>` : ''}`;
+  }
+  if(t.highlights?.length){
+    h += `<h3>Along the way</h3>` + t.highlights.map((x, k) => {
+      const km = t.cum && x.i != null && x.i < t.cum.length ? fmtKm(t.cum[x.i]) : '';
+      return `<button class="hl" data-act="hl" data-i="${k}">
+        <span class="n" style="background:${t.color || TRACK_COLOR}">${k + 1}</span>
+        <div class="grow"><div class="t">${esc(x.name)}</div><div class="m">${[km && 'at ' + km, esc(x.cat)].filter(Boolean).join(' · ')}</div>
+        ${x.intro ? `<div class="m" style="color:var(--ink)">${esc(x.intro)}</div>` : ''}
+        ${x.tips?.length ? `<div class="tips">${x.tips.map(tp => `<p>${esc(tp)}</p>`).join('')}</div>` : ''}</div>
+        ${x.imgs?.[0] ? `<img class="th" loading="lazy" src="${esc(imgUrl(x.imgs[0], 128, 96))}" alt="">` : ''}</button>`;
+    }).join('');
+  }
+  if(t.surfaces?.length){
+    const top = t.surfaces.filter(x => x.amount > .02);
+    h += `<h3>Surface</h3><div class="sfbar">${top.map(x => `<span style="width:${x.amount * 100}%;background:${SURF_COL[x.type] || '#bbb'}"></span>`).join('')}</div>
+      <div class="sfleg">${top.slice(0, 6).map(x => `<span><i style="background:${SURF_COL[x.type] || '#bbb'}"></i>${esc(x.type)} ${Math.round(x.amount * 100)}%</span>`).join('')}</div>`;
+    if(t.wayTypes?.length) h += `<div class="hint">Mostly ${t.wayTypes.filter(x => x.amount > .05).slice(0, 3).map(x => `${esc(x.type)} (${Math.round(x.amount * 100)}%)`).join(', ')}</div>`;
+  }
+  return h;
+}
+async function focusHighlight(t, k){
+  const x = t.highlights?.[k]; if(!x) return;
+  if(x.ll) map.setView(x.ll, Math.max(map.getZoom(), 16));
+  if(S.view === 'detail' && x.kind === 'highlight' && !x.tips){
+    await fetchTips(x); if(S.current === t && S.view === 'detail'){ render(); setTimeout(() => document.querySelector(`.hl[data-i="${k}"]`)?.scrollIntoView({block:'nearest'}), 50); }
+    if(t.saved) saveTrack(t);
+  } else if(S.view === 'detail') document.querySelector(`.hl[data-i="${k}"]`)?.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+let lbIdx = 0;
+function openPhoto(k){
+  const ph = S.current?.photos; if(!ph?.length) return;
+  lbIdx = (k + ph.length) % ph.length; const p = ph[lbIdx];
+  $('#lbImg').src = imgUrl(p.src, Math.min(1600, Math.round(innerWidth * devicePixelRatio)), Math.min(1600, Math.round(innerHeight * devicePixelRatio)));
+  $('#lbCap').textContent = [p.hl, p.by && `📷 ${p.by}`, `${lbIdx + 1} / ${ph.length}`].filter(Boolean).join(' · ');
+  $('#lightbox').classList.remove('hidden');
 }
 function offBox(t){
   if(S.offProg){ const {done, total, fail} = S.offProg; const pct = total ? Math.round(done / total * 100) : 0;
@@ -1443,7 +1634,7 @@ async function importLink(v){
     if(kind === 'smarttour' || id.startsWith('e')) t = await fetchDiscoverTour(id);
     else { try{ t = await fetchUserTour(id); }catch(e){ if(kind === 'tour') throw e; t = await fetchDiscoverTour(id); } }
     if(!t.pts.length) throw new Error('Tour has no coordinates');
-    toast('Loaded', 1200); await saveTrack(t); openTrack(t);
+    toast('Loaded', 1200); await saveTrack(t); openTrack(t); loadPhotos(t);
   }catch(e){ toast(e.message); }
 }
 async function importFiles(files){
@@ -1752,6 +1943,12 @@ document.addEventListener('click', async e => {
   const a = el.dataset.act, t = S.current;
   switch(a){
     case 'search': doSearch(); break;
+    case 'photo': openPhoto(+el.dataset.i); break;
+    case 'lbClose': $('#lightbox').classList.add('hidden'); $('#lbImg').src = ''; break;
+    case 'lbPrev': openPhoto(lbIdx - 1); break;
+    case 'lbNext': openPhoto(lbIdx + 1); break;
+    case 'hl': focusHighlight(t, +el.dataset.i); break;
+    case 'descMore': $('#descText').classList.remove('clamp'); el.remove(); break;
     case 'open': openResult(el.dataset.id); break;
     case 'openSaved': { const x = await dbGet('tracks', el.dataset.id); if(x) openTrack(prepTrack(x)); break; }
     case 'back': S.current = null; trackLayer.clearLayers(); S.sel = null; highlightResult(); show(S.prevView); break;
@@ -1766,7 +1963,8 @@ document.addEventListener('click', async e => {
     case 'gmaps': window.open(`https://www.google.com/maps/dir/?api=1&destination=${t.pts[0][0].toFixed(6)},${t.pts[0][1].toFixed(6)}`, '_blank'); break;
     case 'komoot': window.open(komootUrl(t), '_blank'); break;
     case 'reverse': {
-      t.pts = t.pts.slice().reverse(); t.dirs = null; const up = t.up; t.up = t.down; t.down = up;
+      const n0 = t.pts.length; t.pts = t.pts.slice().reverse(); t.dirs = null; const up = t.up; t.up = t.down; t.down = up;
+      if(t.highlights) t.highlights = t.highlights.map(h => ({...h, i:h.i != null ? n0 - 1 - h.i : h.i})).reverse();
       prepTrack(t); if(t.saved) await saveTrack(t); drawTrack(t); render(); toast('Direction reversed (turn hints are off for reversed routes)'); break; }
     case 'delete':
       if(!confirm(`Delete “${t.name}”${t.offline?.pid ? ' and its offline map' : ''}?`)) break;
@@ -1794,6 +1992,13 @@ document.addEventListener('click', async e => {
       if(S.current) delete S.current.offline; toast('Offline maps cleared'); render(); break;
   }
 });
+
+let lbX = null;
+$('#lightbox').addEventListener('touchstart', e => { lbX = e.touches[0].clientX; }, {passive:true});
+$('#lightbox').addEventListener('touchend', e => { if(lbX == null) return; const dx = e.changedTouches[0].clientX - lbX; lbX = null;
+  if(Math.abs(dx) > 50) openPhoto(lbIdx + (dx < 0 ? 1 : -1)); });
+document.addEventListener('keydown', e => { if($('#lightbox').classList.contains('hidden')) return;
+  if(e.key === 'Escape') $('#lightbox').classList.add('hidden'); else if(e.key === 'ArrowRight') openPhoto(lbIdx + 1); else if(e.key === 'ArrowLeft') openPhoto(lbIdx - 1); });
 
 /* ---------------- place search (Nominatim) ---------------- */
 $('#placeForm').onsubmit = async e => {
