@@ -727,7 +727,7 @@ button,input,select{font:inherit;color:inherit}
 .field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
 .field label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
 select,input[type=text],input[type=url],input[type=number]{height:42px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:0 10px;width:100%;outline:none}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);padding:0 14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);padding:6px 12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;min-width:0;overflow-wrap:anywhere}
 .btn svg{width:18px;height:18px;flex:none}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
 .btn.danger{color:var(--danger)}
@@ -847,7 +847,7 @@ h3{font-size:13px;margin:16px 0 8px;color:var(--muted);text-transform:uppercase;
   <div class="brand"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="32" fill="#1f5a3d"/><path d="M14 46 28 20l8 13 6-7 8 20z" fill="#f6f4ee"/><circle cx="44" cy="18" r="5" fill="#e8571a"/></svg><span>Padvinder</span></div>
   <form class="placeForm" id="placeForm" autocomplete="off">
     <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <input id="placeQ" type="search" placeholder="Go to place…" enterkeyhint="search">
+    <input id="placeQ" type="search" placeholder="Go to place…" data-i18n-ph="Go to place…" enterkeyhint="search">
     <div class="placeList hidden" id="placeList"></div>
   </form>
 </header>
@@ -873,7 +873,7 @@ h3{font-size:13px;margin:16px 0 8px;color:var(--muted);text-transform:uppercase;
   <div class="ps" id="pkTop"></div>
   <div class="pb" id="pkBig"></div>
   <div class="ps" id="pkSub"></div>
-  <div class="pe">Double-tap to wake the screen view</div>
+  <div class="pe" data-i18n="Double-tap to wake the screen view">Double-tap to wake the screen view</div>
 </div>
 <div class="lightbox hidden" id="lightbox">
   <img id="lbImg" alt="">
@@ -947,7 +947,7 @@ const ic = (n, extra='') => `<svg viewBox="0 0 24 24" fill="none" stroke="curren
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------------- settings / persistence ---------------- */
-const DEFAULTS = {provider:'osm', customUrl:'', bufferKm:1.5, maxZoom:16, offThresh:40, sound:true, vibrate:true, sport:'hike', minKm:0, maxKm:25};
+const DEFAULTS = {lang:'auto', provider:'osm', customUrl:'', bufferKm:1.5, maxZoom:16, offThresh:40, sound:true, vibrate:true, sport:'hike', minKm:0, maxKm:25};
 const LS = {
   get(k, d){ try{ const v = localStorage.getItem('pv.'+k); return v==null ? d : JSON.parse(v); }catch{ return d; } },
   set(k, v){ try{ localStorage.setItem('pv.'+k, JSON.stringify(v)); }catch{} },
@@ -955,6 +955,64 @@ const LS = {
 };
 const settings = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 const saveSettings = () => LS.set('settings', settings);
+
+/* ---------------- language ---------------- */
+// English strings are the keys; ${…} parts become {0}, {1}… in the translations.
+const LANGS = {en:'English', nl:'Nederlands', de:'Deutsch', fr:'Français'};
+const CARDS = {nl:['N','NO','O','ZO','Z','ZW','W','NW'], de:['N','NO','O','SO','S','SW','W','NW'], fr:['N','NE','E','SE','S','SO','O','NO']};
+const I18N = {"nl":{"This tour is private":"Deze tocht is privé","Tour not found":"Tocht niet gevonden","Komoot error {0}":"Komoot-fout {0}","Search failed — are you online?":"Zoeken mislukt — ben je online?","Highlight":"Highlight","Not a valid GPX file":"Geen geldig GPX-bestand","No track or route points in this GPX":"Geen track- of routepunten in deze GPX","Imported track":"Geïmporteerde route","That's {0} tiles — reduce the buffer or max zoom in Settings":"Dat zijn {0} tegels — verklein het gebied of het max. zoomniveau in Instellingen","Download cancelled":"Download geannuleerd","Zoom in to the area you want to search":"Zoom in op het gebied waar je wilt zoeken","Tours starting within {0} of the map center":"Tochten die starten binnen {0} van het kaartmidden","any":"alle","Activity":"Activiteit","Min":"Min","Max":"Max","Searching…":"Zoeken…","Search this area":"Zoek in dit gebied","Move the map to where you want to go, then search.":"Verplaats de kaart naar waar je heen wilt en zoek dan.","You can also import a GPX or a Komoot link under Saved.":"Je kunt ook een GPX of Komoot-link importeren onder Opgeslagen.","{0} shown of ~{1} in this area — zoom in or narrow the length for others":"{0} getoond van ~{1} in dit gebied — zoom in of beperk de lengte voor andere","{0} shown":"{0} getoond","{0} away":"{0} hiervandaan","Zoom in a bit first":"Zoom eerst wat verder in","No tours found here — try a larger area or other lengths":"Geen tochten gevonden — probeer een groter gebied of andere lengtes","Back":"Terug","distance":"afstand","ascent":"stijging","time":"tijd","grade":"niveau","source":"bron","Loading route…":"Route laden…","Start navigation":"Start navigatie","Saved":"Opgeslagen","Save":"Opslaan","Offline ✓":"Offline ✓","Make offline":"Offline maken","Export GPX":"GPX exporteren","Share GPX":"GPX delen","Drive to start":"Rijd naar start","Reverse":"Omdraaien","Delete":"Verwijderen","{0} hiked it":"{0} keer gelopen","by {0}":"door {0}","Photo {0}":"Foto {0}","Loading photos…":"Foto’s laden…","About this route":"Over deze route","Read more":"Lees meer","Translated by {0} from {1}":"Vertaald door {0} uit het {1}","Translated from {0}":"Vertaald uit het {0}","Along the way":"Onderweg","at {0}":"bij {0}","Surface":"Ondergrond","Mostly {0}":"Vooral {0}","Downloading map":"Kaart downloaden","{0} / {1} tiles":"{0} / {1} tegels","{0} failed":"{0} mislukt","Cancel":"Annuleren","Offline map: {0} tiles, {1} km around the route up to zoom {2} ({3})":"Offline kaart: {0} tegels, {1} km rond de route tot zoom {2} ({3})","{0} tiles failed, tap Make offline to retry":"{0} tegels mislukt, tik op Offline maken om opnieuw te proberen","Make offline saves the route plus ~{0} km of map around it ({1} tiles, ≈{2} MB) so you can find another way back without signal.":"Offline maken bewaart de route plus ~{0} km kaart eromheen ({1} tegels, ≈{2} MB), zodat je zonder bereik een andere weg terug kunt vinden.","You are offline":"Je bent offline","Offline map saved ({0} tiles failed)":"Offline kaart opgeslagen ({0} tegels mislukt)","Offline map saved ✓":"Offline kaart opgeslagen ✓","Sharing files isn’t supported here — GPX downloaded instead":"Bestanden delen wordt hier niet ondersteund — GPX is gedownload","Import GPX":"GPX importeren","Komoot link":"Komoot-link","komoot.com/tour/… or tour ID":"komoot.com/tour/… of tocht-ID","Load":"Laden","No saved routes yet.":"Nog geen opgeslagen routes.","Save one from Explore, or import a GPX.":"Sla er een op via Ontdekken, of importeer een GPX.","Paste a komoot.com tour link or ID":"Plak een komoot.com-link of tocht-ID","Loading…":"Laden…","Tour has no coordinates":"Tocht heeft geen coördinaten","Loaded":"Geladen","Imported {0} files":"{0} bestanden geïmporteerd","GPX imported":"GPX geïmporteerd","Language":"Taal","Automatic (device)":"Automatisch (apparaat)","Applies to the app and to route names, descriptions and tips. Saved routes are kept.":"Geldt voor de app en voor routenamen, beschrijvingen en tips. Opgeslagen routes blijven bewaard.","Map":"Kaart","Map style":"Kaartstijl","Custom tile URL…":"Eigen tegel-URL…","Tile URL":"Tegel-URL","Offline maps":"Offline kaarten","Area around route":"Gebied rond route","Max detail":"Max. detail","Zoom 17 (near route)":"Zoom 17 (dicht bij route)","Navigation":"Navigatie","Off-route warning after":"Waarschuwing buiten route na","Vibrate on turns and off-route":"Trillen bij afslagen en buiten route","Beep when off route":"Piepen buiten de route","Storage":"Opslag","Offline tiles":"Offline tegels","Used by this app":"Gebruikt door deze app","Protected from cleanup":"Beschermd tegen opschonen","Yes":"Ja","No":"Nee","Protect storage":"Opslag beschermen","Clear offline maps":"Offline kaarten wissen","Routes come from Komoot’s public (unofficial) API. Map data © OpenStreetMap contributors. GPS only runs while the screen is on — use the screen lock toggle and pocket mode during navigation.":"Routes komen van de openbare (onofficiële) Komoot-API. Kaartgegevens © OpenStreetMap-bijdragers. GPS werkt alleen als het scherm aan staat — gebruik tijdens het navigeren ‘scherm blijft aan’ en de broekzakmodus.","No GPS available in this browser":"Geen GPS beschikbaar in deze browser","Location permission denied":"Toegang tot locatie geweigerd","Waiting for a GPS signal…":"Wachten op GPS-signaal…","Keeping the screen on isn’t supported here":"Scherm aan houden wordt hier niet ondersteund","Waiting for GPS":"Wachten op GPS","Make sure location is on":"Zorg dat locatie aan staat","Route is {0} {1}":"Route ligt {0} naar het {1}","Nearest point of the route · start is {0} away":"Dichtstbijzijnde punt van de route · start ligt {0} verderop","Off route · {0}":"Buiten de route · {0}","Rejoin to the {0}":"Terug naar de route: {0}","(arrow points north-up)":"(pijl wijst naar het noorden)","You have arrived":"Je bent er","{0} done":"{0} afgelegd","onto {0}":"naar {0}","then {0} to go":"daarna nog {0}","Follow the route · {0}":"Volg de route · {0}","Follow the route":"Volg de route","heading {0} · {1} to go":"richting {0} · nog {1}","done":"afgelegd","to go":"te gaan","arrive ~{0}":"aankomst ~{0}","↑ {0} m climbing left":"↑ nog {0} m klimmen","OFF ROUTE":"BUITEN ROUTE","Away from route":"Niet bij de route","To go":"Te gaan","Back the way you came":"Terug zoals je kwam","Finish the loop":"Rondje afmaken","Continue to the end":"Door naar het eind","Start, straight line":"Start, hemelsbreed","Waiting for GPS…":"Wachten op GPS…","Pocket mode":"Broekzakmodus","Screen stays on":"Scherm blijft aan","Screen may sleep":"Scherm mag uit","Way back":"Weg terug","Walk to start (Maps)":"Loop naar start (Maps)","Stop navigation":"Stop navigatie","Recenter":"Centreren","Already saved — use Delete to remove":"Al opgeslagen — gebruik Verwijderen om te wissen","Direction reversed (turn hints are off for reversed routes)":"Richting omgedraaid (geen afslaginstructies bij omgedraaide routes)","Delete “{0}” and its offline map?":"“{0}” en de offline kaart verwijderen?","Delete “{0}”?":"“{0}” verwijderen?","Deleted":"Verwijderd","Stop navigation?":"Navigatie stoppen?","Storage protected":"Opslag beschermd","Browser declined — installing the app usually helps":"Browser weigerde — de app installeren helpt meestal","Remove all offline maps?":"Alle offline kaarten verwijderen?","Offline maps cleared":"Offline kaarten gewist","Nothing found":"Niets gevonden","Place search needs a connection":"Plaats zoeken heeft verbinding nodig","Back online":"Weer online","Offline — saved routes and offline maps still work":"Offline — opgeslagen routes en offline kaarten werken nog","{0} saved routes updated":"{0} opgeslagen routes bijgewerkt","Resuming navigation":"Navigatie hervat","Hike":"Wandelen","Run":"Hardlopen","Bike tour":"Fietstocht","Mountain bike":"Mountainbike","Road bike":"Racefiets","easy":"makkelijk","moderate":"gemiddeld","difficult":"moeilijk","Continue straight":"Rechtdoor","Turn left":"Linksaf","Turn right":"Rechtsaf","Sharp left":"Scherp linksaf","Sharp right":"Scherp rechtsaf","Bear left":"Flauw links","Bear right":"Flauw rechts","Keep left":"Links aanhouden","Keep right":"Rechts aanhouden","Turn around":"Omkeren","Continue":"Ga verder","Explore":"Ontdekken","Settings":"Instellingen","asphalt":"asfalt","paved":"verhard","concrete":"beton","gravel":"grind","compacted":"halfverhard","unpaved":"onverhard","ground":"aarde","nature":"natuurpad","grass":"gras","sand":"zand","alpine":"alpien","unknown":"onbekend","cobbles":"kinderkopjes","wood":"hout","way":"pad","street":"straat","minor road":"kleine weg","footway":"voetpad","hiking path":"wandelpad","hike":"wandelpad","path":"pad","track":"bospad","cycleway":"fietspad","service":"toegangsweg","primary":"hoofdweg","secondary":"provinciale weg","state road":"provinciale weg","trail":"trail","cycle route":"fietsroute","alpine path":"bergpad","ferry":"veerpont","Go to place…":"Ga naar plaats…","Double-tap to wake the screen view":"Dubbeltik om het scherm te tonen","historical site":"historische plek","man made monument":"monument","facilities":"voorzieningen","castle":"kasteel","lake":"meer","river":"rivier","forest":"bos","cafe":"café","restaurant":"restaurant","viewpoint":"uitzichtpunt","nature reserve":"natuurgebied","church":"kerk","bridge":"brug","mill":"molen","beach":"strand","waterfall":"waterval","natural monument":"natuurmonument","bench":"bankje","heath":"heide","park":"park","shelter":"schuilhut","religious site":"religieuze plek","monument":"monument","pond":"vijver","hill":"heuvel","trailhead":"startpunt","bar":"bar","museum":"museum"},"de":{"This tour is private":"Diese Tour ist privat","Tour not found":"Tour nicht gefunden","Komoot error {0}":"Komoot-Fehler {0}","Search failed — are you online?":"Suche fehlgeschlagen — bist du online?","Highlight":"Highlight","Not a valid GPX file":"Keine gültige GPX-Datei","No track or route points in this GPX":"Keine Track- oder Routenpunkte in dieser GPX","Imported track":"Importierte Route","That's {0} tiles — reduce the buffer or max zoom in Settings":"Das sind {0} Kacheln — verkleinere den Bereich oder den max. Zoom in den Einstellungen","Download cancelled":"Download abgebrochen","Zoom in to the area you want to search":"Zoome in das Gebiet, in dem du suchen willst","Tours starting within {0} of the map center":"Touren mit Start innerhalb von {0} um die Kartenmitte","any":"beliebig","Activity":"Aktivität","Min":"Min","Max":"Max","Searching…":"Suche…","Search this area":"In diesem Gebiet suchen","Move the map to where you want to go, then search.":"Verschiebe die Karte dorthin, wo du hinwillst, und suche dann.","You can also import a GPX or a Komoot link under Saved.":"Unter Gespeichert kannst du auch eine GPX-Datei oder einen Komoot-Link importieren.","{0} shown of ~{1} in this area — zoom in or narrow the length for others":"{0} von ~{1} in diesem Gebiet angezeigt — zoome hinein oder grenze die Länge ein, um andere zu sehen","{0} shown":"{0} angezeigt","{0} away":"{0} entfernt","Zoom in a bit first":"Zoome zuerst etwas hinein","No tours found here — try a larger area or other lengths":"Keine Touren gefunden — versuche ein größeres Gebiet oder andere Längen","Back":"Zurück","distance":"Distanz","ascent":"Anstieg","time":"Zeit","grade":"Niveau","source":"Quelle","Loading route…":"Route wird geladen…","Start navigation":"Navigation starten","Saved":"Gespeichert","Save":"Speichern","Offline ✓":"Offline ✓","Make offline":"Offline speichern","Export GPX":"GPX exportieren","Share GPX":"GPX teilen","Drive to start":"Zum Start fahren","Reverse":"Umkehren","Delete":"Löschen","{0} hiked it":"{0}× gewandert","by {0}":"von {0}","Photo {0}":"Foto {0}","Loading photos…":"Fotos werden geladen…","About this route":"Über diese Route","Read more":"Weiterlesen","Translated by {0} from {1}":"Übersetzt von {0} aus dem {1}","Translated from {0}":"Übersetzt aus dem {0}","Along the way":"Unterwegs","at {0}":"bei {0}","Surface":"Untergrund","Mostly {0}":"Überwiegend {0}","Downloading map":"Karte wird geladen","{0} / {1} tiles":"{0} / {1} Kacheln","{0} failed":"{0} fehlgeschlagen","Cancel":"Abbrechen","Offline map: {0} tiles, {1} km around the route up to zoom {2} ({3})":"Offline-Karte: {0} Kacheln, {1} km um die Route bis Zoom {2} ({3})","{0} tiles failed, tap Make offline to retry":"{0} Kacheln fehlgeschlagen, tippe auf Offline speichern zum Wiederholen","Make offline saves the route plus ~{0} km of map around it ({1} tiles, ≈{2} MB) so you can find another way back without signal.":"Offline speichern sichert die Route plus ~{0} km Karte drumherum ({1} Kacheln, ≈{2} MB), damit du auch ohne Netz einen anderen Rückweg findest.","You are offline":"Du bist offline","Offline map saved ({0} tiles failed)":"Offline-Karte gespeichert ({0} Kacheln fehlgeschlagen)","Offline map saved ✓":"Offline-Karte gespeichert ✓","Sharing files isn’t supported here — GPX downloaded instead":"Teilen von Dateien wird hier nicht unterstützt — GPX wurde heruntergeladen","Import GPX":"GPX importieren","Komoot link":"Komoot-Link","komoot.com/tour/… or tour ID":"komoot.com/tour/… oder Tour-ID","Load":"Laden","No saved routes yet.":"Noch keine gespeicherten Routen.","Save one from Explore, or import a GPX.":"Speichere eine unter Entdecken oder importiere eine GPX-Datei.","Paste a komoot.com tour link or ID":"Füge einen komoot.com-Link oder eine Tour-ID ein","Loading…":"Wird geladen…","Tour has no coordinates":"Tour hat keine Koordinaten","Loaded":"Geladen","Imported {0} files":"{0} Dateien importiert","GPX imported":"GPX importiert","Language":"Sprache","Automatic (device)":"Automatisch (Gerät)","Applies to the app and to route names, descriptions and tips. Saved routes are kept.":"Gilt für die App sowie Routennamen, Beschreibungen und Tipps. Gespeicherte Routen bleiben erhalten.","Map":"Karte","Map style":"Kartenstil","Custom tile URL…":"Eigene Kachel-URL…","Tile URL":"Kachel-URL","Offline maps":"Offline-Karten","Area around route":"Bereich um die Route","Max detail":"Max. Detail","Zoom 17 (near route)":"Zoom 17 (nahe der Route)","Navigation":"Navigation","Off-route warning after":"Warnung abseits der Route nach","Vibrate on turns and off-route":"Vibrieren bei Abbiegungen und abseits der Route","Beep when off route":"Piepton abseits der Route","Storage":"Speicher","Offline tiles":"Offline-Kacheln","Used by this app":"Von dieser App belegt","Protected from cleanup":"Vor Bereinigung geschützt","Yes":"Ja","No":"Nein","Protect storage":"Speicher schützen","Clear offline maps":"Offline-Karten löschen","Routes come from Komoot’s public (unofficial) API. Map data © OpenStreetMap contributors. GPS only runs while the screen is on — use the screen lock toggle and pocket mode during navigation.":"Routen stammen aus der öffentlichen (inoffiziellen) Komoot-API. Kartendaten © OpenStreetMap-Mitwirkende. GPS läuft nur bei eingeschaltetem Bildschirm — nutze beim Navigieren „Bildschirm bleibt an“ und den Taschenmodus.","No GPS available in this browser":"Kein GPS in diesem Browser verfügbar","Location permission denied":"Standortzugriff verweigert","Waiting for a GPS signal…":"Warte auf GPS-Signal…","Keeping the screen on isn’t supported here":"Bildschirm-an wird hier nicht unterstützt","Waiting for GPS":"Warte auf GPS","Make sure location is on":"Stelle sicher, dass der Standort aktiv ist","Route is {0} {1}":"Route liegt {0} Richtung {1}","Nearest point of the route · start is {0} away":"Nächster Punkt der Route · Start ist {0} entfernt","Off route · {0}":"Abseits der Route · {0}","Rejoin to the {0}":"Zurück zur Route: {0}","(arrow points north-up)":"(Pfeil zeigt nach Norden)","You have arrived":"Du bist angekommen","{0} done":"{0} geschafft","onto {0}":"auf {0}","then {0} to go":"danach noch {0}","Follow the route · {0}":"Folge der Route · {0}","Follow the route":"Folge der Route","heading {0} · {1} to go":"Richtung {0} · noch {1}","done":"geschafft","to go":"verbleibend","arrive ~{0}":"Ankunft ~{0}","↑ {0} m climbing left":"↑ noch {0} m Anstieg","OFF ROUTE":"ABSEITS DER ROUTE","Away from route":"Nicht an der Route","To go":"Verbleibend","Back the way you came":"Zurück auf dem Hinweg","Finish the loop":"Runde beenden","Continue to the end":"Weiter bis zum Ende","Start, straight line":"Start, Luftlinie","Waiting for GPS…":"Warte auf GPS…","Pocket mode":"Taschenmodus","Screen stays on":"Bildschirm bleibt an","Screen may sleep":"Bildschirm darf aus","Way back":"Rückweg","Walk to start (Maps)":"Zum Start gehen (Maps)","Stop navigation":"Navigation beenden","Recenter":"Zentrieren","Already saved — use Delete to remove":"Bereits gespeichert — zum Entfernen Löschen nutzen","Direction reversed (turn hints are off for reversed routes)":"Richtung umgekehrt (keine Abbiegehinweise bei umgekehrten Routen)","Delete “{0}” and its offline map?":"„{0}“ und die Offline-Karte löschen?","Delete “{0}”?":"„{0}“ löschen?","Deleted":"Gelöscht","Stop navigation?":"Navigation beenden?","Storage protected":"Speicher geschützt","Browser declined — installing the app usually helps":"Browser hat abgelehnt — die App zu installieren hilft meist","Remove all offline maps?":"Alle Offline-Karten löschen?","Offline maps cleared":"Offline-Karten gelöscht","Nothing found":"Nichts gefunden","Place search needs a connection":"Ortssuche braucht eine Verbindung","Back online":"Wieder online","Offline — saved routes and offline maps still work":"Offline — gespeicherte Routen und Offline-Karten funktionieren weiter","{0} saved routes updated":"{0} gespeicherte Routen aktualisiert","Resuming navigation":"Navigation wird fortgesetzt","Hike":"Wandern","Run":"Laufen","Bike tour":"Radtour","Mountain bike":"Mountainbike","Road bike":"Rennrad","easy":"leicht","moderate":"mittel","difficult":"schwer","Continue straight":"Geradeaus","Turn left":"Links abbiegen","Turn right":"Rechts abbiegen","Sharp left":"Scharf links","Sharp right":"Scharf rechts","Bear left":"Leicht links","Bear right":"Leicht rechts","Keep left":"Links halten","Keep right":"Rechts halten","Turn around":"Umkehren","Continue":"Weiter","Explore":"Entdecken","Settings":"Einstellungen","asphalt":"Asphalt","paved":"befestigt","concrete":"Beton","gravel":"Schotter","compacted":"verdichtet","unpaved":"unbefestigt","ground":"Erde","nature":"Naturweg","grass":"Gras","sand":"Sand","alpine":"alpin","unknown":"unbekannt","cobbles":"Kopfsteinpflaster","wood":"Holz","way":"Weg","street":"Straße","minor road":"Nebenstraße","footway":"Fußweg","hiking path":"Wanderweg","hike":"Wanderweg","path":"Pfad","track":"Feldweg","cycleway":"Radweg","service":"Zufahrtsweg","primary":"Hauptstraße","secondary":"Landstraße","state road":"Landstraße","trail":"Trail","cycle route":"Radroute","alpine path":"Bergweg","ferry":"Fähre","Go to place…":"Gehe zu Ort…","Double-tap to wake the screen view":"Doppeltippen, um die Ansicht zu zeigen","historical site":"historische Stätte","man made monument":"Denkmal","facilities":"Einrichtungen","castle":"Burg","lake":"See","river":"Fluss","forest":"Wald","cafe":"Café","restaurant":"Restaurant","viewpoint":"Aussichtspunkt","nature reserve":"Naturschutzgebiet","church":"Kirche","bridge":"Brücke","mill":"Mühle","beach":"Strand","waterfall":"Wasserfall","natural monument":"Naturdenkmal","bench":"Bank","heath":"Heide","park":"Park","shelter":"Schutzhütte","religious site":"religiöse Stätte","monument":"Denkmal","pond":"Teich","hill":"Hügel","trailhead":"Ausgangspunkt","bar":"Bar","museum":"Museum"},"fr":{"This tour is private":"Cet itinéraire est privé","Tour not found":"Itinéraire introuvable","Komoot error {0}":"Erreur Komoot {0}","Search failed — are you online?":"Échec de la recherche — êtes-vous en ligne ?","Highlight":"Point fort","Not a valid GPX file":"Fichier GPX non valide","No track or route points in this GPX":"Aucun point de trace ou d’itinéraire dans ce GPX","Imported track":"Trace importée","That's {0} tiles — reduce the buffer or max zoom in Settings":"Cela fait {0} tuiles — réduisez la zone ou le zoom max. dans les Réglages","Download cancelled":"Téléchargement annulé","Zoom in to the area you want to search":"Zoomez sur la zone à explorer","Tours starting within {0} of the map center":"Itinéraires partant à moins de {0} du centre de la carte","any":"tous","Activity":"Activité","Min":"Min","Max":"Max","Searching…":"Recherche…","Search this area":"Rechercher dans cette zone","Move the map to where you want to go, then search.":"Déplacez la carte là où vous voulez aller, puis lancez la recherche.","You can also import a GPX or a Komoot link under Saved.":"Vous pouvez aussi importer un GPX ou un lien Komoot dans Enregistrés.","{0} shown of ~{1} in this area — zoom in or narrow the length for others":"{0} affichés sur ~{1} dans cette zone — zoomez ou réduisez la longueur pour en voir d’autres","{0} shown":"{0} affichés","{0} away":"à {0}","Zoom in a bit first":"Zoomez un peu d’abord","No tours found here — try a larger area or other lengths":"Aucun itinéraire trouvé — essayez une zone plus grande ou d’autres longueurs","Back":"Retour","distance":"distance","ascent":"dénivelé","time":"durée","grade":"niveau","source":"source","Loading route…":"Chargement de l’itinéraire…","Start navigation":"Démarrer la navigation","Saved":"Enregistrés","Save":"Enregistrer","Offline ✓":"Hors ligne ✓","Make offline":"Rendre hors ligne","Export GPX":"Exporter GPX","Share GPX":"Partager GPX","Drive to start":"Aller au départ","Reverse":"Inverser","Delete":"Supprimer","{0} hiked it":"{0} randonneurs","by {0}":"par {0}","Photo {0}":"Photo {0}","Loading photos…":"Chargement des photos…","About this route":"À propos de cet itinéraire","Read more":"Lire la suite","Translated by {0} from {1}":"Traduit par {0} depuis {1}","Translated from {0}":"Traduit depuis {0}","Along the way":"En chemin","at {0}":"à {0}","Surface":"Revêtement","Mostly {0}":"Surtout {0}","Downloading map":"Téléchargement de la carte","{0} / {1} tiles":"{0} / {1} tuiles","{0} failed":"{0} en échec","Cancel":"Annuler","Offline map: {0} tiles, {1} km around the route up to zoom {2} ({3})":"Carte hors ligne : {0} tuiles, {1} km autour de l’itinéraire jusqu’au zoom {2} ({3})","{0} tiles failed, tap Make offline to retry":"{0} tuiles en échec, touchez Rendre hors ligne pour réessayer","Make offline saves the route plus ~{0} km of map around it ({1} tiles, ≈{2} MB) so you can find another way back without signal.":"Rendre hors ligne enregistre l’itinéraire et ~{0} km de carte autour ({1} tuiles, ≈{2} Mo) pour trouver un autre chemin de retour sans réseau.","You are offline":"Vous êtes hors ligne","Offline map saved ({0} tiles failed)":"Carte hors ligne enregistrée ({0} tuiles en échec)","Offline map saved ✓":"Carte hors ligne enregistrée ✓","Sharing files isn’t supported here — GPX downloaded instead":"Le partage de fichiers n’est pas pris en charge ici — GPX téléchargé à la place","Import GPX":"Importer GPX","Komoot link":"Lien Komoot","komoot.com/tour/… or tour ID":"komoot.com/tour/… ou ID","Load":"Charger","No saved routes yet.":"Aucun itinéraire enregistré.","Save one from Explore, or import a GPX.":"Enregistrez-en un depuis Explorer ou importez un GPX.","Paste a komoot.com tour link or ID":"Collez un lien komoot.com ou un ID","Loading…":"Chargement…","Tour has no coordinates":"L’itinéraire n’a pas de coordonnées","Loaded":"Chargé","Imported {0} files":"{0} fichiers importés","GPX imported":"GPX importé","Language":"Langue","Automatic (device)":"Automatique (appareil)","Applies to the app and to route names, descriptions and tips. Saved routes are kept.":"S’applique à l’application ainsi qu’aux noms, descriptions et conseils des itinéraires. Les itinéraires enregistrés sont conservés.","Map":"Carte","Map style":"Style de carte","Custom tile URL…":"URL de tuiles personnalisée…","Tile URL":"URL des tuiles","Offline maps":"Cartes hors ligne","Area around route":"Zone autour de l’itinéraire","Max detail":"Détail max.","Zoom 17 (near route)":"Zoom 17 (près de l’itinéraire)","Navigation":"Navigation","Off-route warning after":"Alerte hors itinéraire après","Vibrate on turns and off-route":"Vibrer aux virages et hors itinéraire","Beep when off route":"Bip hors itinéraire","Storage":"Stockage","Offline tiles":"Tuiles hors ligne","Used by this app":"Utilisé par l’application","Protected from cleanup":"Protégé du nettoyage","Yes":"Oui","No":"Non","Protect storage":"Protéger le stockage","Clear offline maps":"Effacer les cartes hors ligne","Routes come from Komoot’s public (unofficial) API. Map data © OpenStreetMap contributors. GPS only runs while the screen is on — use the screen lock toggle and pocket mode during navigation.":"Les itinéraires viennent de l’API publique (non officielle) de Komoot. Données cartographiques © contributeurs OpenStreetMap. Le GPS ne fonctionne qu’écran allumé — utilisez « écran toujours allumé » et le mode poche pendant la navigation.","No GPS available in this browser":"Pas de GPS disponible dans ce navigateur","Location permission denied":"Accès à la position refusé","Waiting for a GPS signal…":"En attente du signal GPS…","Keeping the screen on isn’t supported here":"Garder l’écran allumé n’est pas pris en charge ici","Waiting for GPS":"En attente du GPS","Make sure location is on":"Vérifiez que la localisation est activée","Route is {0} {1}":"Itinéraire à {0} vers le {1}","Nearest point of the route · start is {0} away":"Point le plus proche de l’itinéraire · départ à {0}","Off route · {0}":"Hors itinéraire · {0}","Rejoin to the {0}":"Rejoindre vers le {0}","(arrow points north-up)":"(flèche orientée nord)","You have arrived":"Vous êtes arrivé","{0} done":"{0} parcourus","onto {0}":"sur {0}","then {0} to go":"puis encore {0}","Follow the route · {0}":"Suivez l’itinéraire · {0}","Follow the route":"Suivez l’itinéraire","heading {0} · {1} to go":"direction {0} · encore {1}","done":"parcouru","to go":"restant","arrive ~{0}":"arrivée ~{0}","↑ {0} m climbing left":"↑ encore {0} m de montée","OFF ROUTE":"HORS ITINÉRAIRE","Away from route":"Loin de l’itinéraire","To go":"Restant","Back the way you came":"Retour par le même chemin","Finish the loop":"Terminer la boucle","Continue to the end":"Continuer jusqu’à l’arrivée","Start, straight line":"Départ, à vol d’oiseau","Waiting for GPS…":"En attente du GPS…","Pocket mode":"Mode poche","Screen stays on":"Écran toujours allumé","Screen may sleep":"L’écran peut s’éteindre","Way back":"Chemin du retour","Walk to start (Maps)":"Marcher au départ (Maps)","Stop navigation":"Arrêter la navigation","Recenter":"Recentrer","Already saved — use Delete to remove":"Déjà enregistré — utilisez Supprimer pour l’enlever","Direction reversed (turn hints are off for reversed routes)":"Sens inversé (pas d’indications de virage pour les itinéraires inversés)","Delete “{0}” and its offline map?":"Supprimer « {0} » et sa carte hors ligne ?","Delete “{0}”?":"Supprimer « {0} » ?","Deleted":"Supprimé","Stop navigation?":"Arrêter la navigation ?","Storage protected":"Stockage protégé","Browser declined — installing the app usually helps":"Le navigateur a refusé — installer l’application aide généralement","Remove all offline maps?":"Supprimer toutes les cartes hors ligne ?","Offline maps cleared":"Cartes hors ligne effacées","Nothing found":"Aucun résultat","Place search needs a connection":"La recherche de lieu nécessite une connexion","Back online":"De nouveau en ligne","Offline — saved routes and offline maps still work":"Hors ligne — les itinéraires enregistrés et cartes hors ligne fonctionnent toujours","{0} saved routes updated":"{0} itinéraires enregistrés mis à jour","Resuming navigation":"Reprise de la navigation","Hike":"Randonnée","Run":"Course","Bike tour":"Vélo","Mountain bike":"VTT","Road bike":"Vélo de route","easy":"facile","moderate":"moyen","difficult":"difficile","Continue straight":"Tout droit","Turn left":"Tournez à gauche","Turn right":"Tournez à droite","Sharp left":"Virage serré à gauche","Sharp right":"Virage serré à droite","Bear left":"Légèrement à gauche","Bear right":"Légèrement à droite","Keep left":"Restez à gauche","Keep right":"Restez à droite","Turn around":"Faites demi-tour","Continue":"Continuez","Explore":"Explorer","Settings":"Réglages","asphalt":"asphalte","paved":"revêtu","concrete":"béton","gravel":"gravier","compacted":"compacté","unpaved":"non revêtu","ground":"terre","nature":"naturel","grass":"herbe","sand":"sable","alpine":"alpin","unknown":"inconnu","cobbles":"pavés","wood":"bois","way":"chemin","street":"rue","minor road":"petite route","footway":"trottoir","hiking path":"sentier de randonnée","hike":"sentier","path":"sentier","track":"piste","cycleway":"piste cyclable","service":"voie de service","primary":"route principale","secondary":"route secondaire","state road":"route départementale","trail":"sentier","cycle route":"itinéraire cyclable","alpine path":"sentier alpin","ferry":"bac","Go to place…":"Aller à un lieu…","Double-tap to wake the screen view":"Touchez deux fois pour réafficher l’écran","historical site":"site historique","man made monument":"monument","facilities":"équipements","castle":"château","lake":"lac","river":"rivière","forest":"forêt","cafe":"café","restaurant":"restaurant","viewpoint":"point de vue","nature reserve":"réserve naturelle","church":"église","bridge":"pont","mill":"moulin","beach":"plage","waterfall":"cascade","natural monument":"monument naturel","bench":"banc","heath":"lande","park":"parc","shelter":"abri","religious site":"site religieux","monument":"monument","pond":"étang","hill":"colline","trailhead":"départ de sentier","bar":"bar","museum":"musée"}};
+const resolveLang = v => v && v !== 'auto' && LANGS[v] ? v : (LANGS[(navigator.language || 'en').slice(0, 2).toLowerCase()] ? (navigator.language || 'en').slice(0, 2).toLowerCase() : 'en');
+let LANG = resolveLang(settings.lang);
+function T(strs, ...vals){
+  const key = strs.reduce((a, p, i) => a + (i ? `{${i - 1}}` : '') + p, '');
+  const tr = I18N[LANG]?.[key] ?? key;
+  return tr.replace(/\{(\d+)\}/g, (_, i) => vals[+i] ?? '');
+}
+const tt = k => (k && I18N[LANG]?.[k]) || k || '';
+function applyStaticI18n(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = tt(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = tt(el.dataset.i18nPh));
+  document.querySelectorAll('#tabs button').forEach(b => { const sp = b.querySelector('span'); if(sp) sp.textContent = tt({explore:'Explore', library:'Saved', settings:'Settings'}[b.dataset.tab]); });
+  const r = $('#btnRecenter'); if(r && !r.classList.contains('hidden')) r.innerHTML = ic('compass') + T`Recenter`;
+}
+async function setLanguage(v){
+  settings.lang = v; saveSettings();
+  const prev = LANG; LANG = resolveLang(v);
+  applyStaticI18n(); render();
+  if(S.view === 'nav') updateNavUI();
+  if(prev === LANG) return;
+  // Komoot content (names, descriptions, highlights, tips) is fetched in the chosen language:
+  // re-run the current search and refresh the texts of saved routes. Geometry, offline maps, colours and progress stay as they are.
+  if(navigator.onLine && S.results.length) doSearch();
+  if(navigator.onLine) refreshSavedTexts();
+}
+async function refreshSavedTexts(){
+  const all = (await dbAll('tracks')).filter(t => t.source === 'komoot' && t.komootId);
+  let n = 0;
+  for(const t of all){
+    try{
+      const d = t.kind === 'tour' ? await kget(`/tours/${encodeURIComponent(t.komootId)}?_embedded=timeline`)
+                                  : await kget(`/discover_tours/${encodeURIComponent(t.komootId)}?_embedded=timeline`);
+      const det = detailsFromKomoot(d);
+      if(t.reversed && det.highlights){ const n0 = t.pts.length; det.highlights = det.highlights.map(h => ({...h, i:h.i != null ? n0 - 1 - h.i : h.i})).reverse(); }
+      if(!det.highlights?.length) delete det.highlights;          // user tours have no timeline here — keep what we had
+      if(!det.surfaces?.length) delete det.surfaces;
+      if(!det.wayTypes?.length) delete det.wayTypes;
+      const fresh = await dbGet('tracks', t.id); if(!fresh) continue;   // deleted meanwhile
+      Object.assign(fresh, det, {name:d.name || fresh.name});
+      if(!det.desc) delete fresh.desc;
+      await dbPut('tracks', fresh); n++;
+      if(S.current?.id === t.id){
+        const keep = {color:S.current.color, saved:true, photos:S.current.photos, photosTried:S.current.photosTried};
+        Object.assign(S.current, det, {name:fresh.name}, keep); if(!det.desc) delete S.current.desc;
+        drawTrack(S.current); if(S.view === 'detail' || S.view === 'nav') render();
+      }
+    }catch{}
+  }
+  if(S.view === 'library') render();
+  if(n) toast(T`${n} saved routes updated`);
+}
 
 let dbp;
 function idb(){
@@ -985,7 +1043,7 @@ function bearing(a, b){ const y=Math.sin((b[1]-a[1])*RAD)*Math.cos(b[0]*RAD);
   const x=Math.cos(a[0]*RAD)*Math.sin(b[0]*RAD)-Math.sin(a[0]*RAD)*Math.cos(b[0]*RAD)*Math.cos((b[1]-a[1])*RAD);
   return (Math.atan2(y, x)/RAD + 360) % 360; }
 const CARD = ['N','NE','E','SE','S','SW','W','NW'];
-const cardinal = deg => CARD[Math.round(deg/45) % 8];
+const cardinal = deg => (CARDS[LANG] || CARD)[Math.round(deg/45) % 8];
 function segDist(p, a, b){ // distance (m) from p to segment ab, plus fraction along
   const k = Math.cos(p[0]*RAD);
   const ax=(a[1]-p[1])*k, ay=a[0]-p[0], bx=(b[1]-p[1])*k, by=b[0]-p[0], dx=bx-ax, dy=by-ay;
@@ -1004,7 +1062,7 @@ function decodePolyline(s, prec=1e6){
 }
 const fmtKm = m => m == null ? '–' : m < 1000 ? `${Math.round(m/10)*10} m` : `${(m/1000).toFixed(m < 100000 ? 1 : 0)} km`;
 const fmtDur = s => { if(s == null || !isFinite(s)) return '–'; const h=Math.floor(s/3600), mm=Math.round((s%3600)/60); return mm===60 ? `${h+1}:00` : `${h}:${String(mm).padStart(2,'0')}`; };
-const fmtClock = t => new Date(t).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+const fmtClock = t => new Date(t).toLocaleTimeString(LANG, {hour:'2-digit', minute:'2-digit'});
 
 /* ---------------- track model ---------------- */
 function prepTrack(t){
@@ -1034,8 +1092,8 @@ function pointAt(t, d){ const i = idxAt(t, d), n = t.pts.length; if(i >= n-1) re
 
 /* ---------------- Komoot ---------------- */
 async function kget(path){
-  const r = await fetch(KOMOOT + path, {headers:{Accept:'application/hal+json'}});
-  if(!r.ok){ const e = new Error(r.status === 403 ? 'This tour is private' : r.status === 404 ? 'Tour not found' : `Komoot error ${r.status}`); e.status = r.status; throw e; }
+  const r = await fetch(KOMOOT + path, {headers:{Accept:'application/hal+json', 'Accept-Language':LANG}});
+  if(!r.ok){ const e = new Error(r.status === 403 ? T`This tour is private` : r.status === 404 ? T`Tour not found` : T`Komoot error ${r.status}`); e.status = r.status; throw e; }
   return r.json();
 }
 function previewFromItem(it){
@@ -1075,7 +1133,7 @@ async function komootSearch(center, radius, sport, minM, maxM){
         start:it.start_point ? [it.start_point.lat, it.start_point.lng] : null, preview:previewFromItem(it)});
     }
   }
-  if(failed === res.length) throw new Error('Search failed — are you online?');
+  if(failed === res.length) throw new Error(T`Search failed — are you online?`);
   const list = [...seen.values()].filter(x => x.distance >= minM && x.distance <= maxM);
   const c = [center.lat, center.lng];
   list.forEach(x => x.from = x.start ? dist(c, x.start) : 1e9);
@@ -1084,7 +1142,7 @@ async function komootSearch(center, radius, sport, minM, maxM){
   return {list, total};
 }
 function pickLang(orig, origLang, tr, trLang){
-  const ui = (navigator.language || 'en').slice(0, 2).toLowerCase();
+  const ui = LANG;
   if(tr && (trLang || '').slice(0, 2).toLowerCase() === ui && (origLang || '').slice(0, 2).toLowerCase() !== ui) return tr;
   return orig || tr || '';
 }
@@ -1094,9 +1152,9 @@ function detailsFromKomoot(d){
     out.desc = {text:pickLang(td.text, td.text_language, td.translated_text, td.translated_text_language).trim(),
       short:pickLang(td.short_description, td.text_language, td.translated_short_description, td.translated_text_language).trim(),
       attribution:''};
-    const ui = (navigator.language || 'en').slice(0, 2).toLowerCase();
+    const ui = LANG;
     if(td.translated_text && out.desc.text === td.translated_text.trim() && (td.text_language || '').slice(0, 2).toLowerCase() !== ui)
-      out.desc.attribution = `Translated${td.attribution ? ' by ' + td.attribution : ''} from ${(td.text_language || '?').toUpperCase()}`;
+      out.desc.translatedFrom = (td.text_language || '?').toUpperCase(); out.desc.by = td.attribution || '';
     if(!out.desc.text && !out.desc.short) delete out.desc;
   }
   out.author = e.creator?.display_name || null;
@@ -1114,7 +1172,7 @@ function detailsFromKomoot(d){
     if(it.type === 'highlight'){
       const imgs = r._embedded?.images?._embedded?.items || [];
       const p = r.mid_point || r.start_point;
-      out.highlights.push({kind:'highlight', id:r.id, name:r.name || r.base_name || 'Highlight', intro:r.short_intro || '',
+      out.highlights.push({kind:'highlight', id:r.id, name:r.name || r.base_name || T`Highlight`, intro:r.short_intro || '',
         cat:(r.category || '').replace(/_/g, ' '), i:it.index, ll:p ? [p.lat, p.lng] : null,
         imgs:imgs.slice(0, 4).map(x => x.src).filter(Boolean)});
     } else if(it.type === 'poi' && r.name){
@@ -1177,15 +1235,15 @@ function komootUrl(t){ return t.kind === 'tour' ? `https://www.komoot.com/tour/$
 /* ---------------- GPX ---------------- */
 function parseGPX(text, fname){
   const doc = new DOMParser().parseFromString(text, 'application/xml');
-  if(doc.querySelector('parsererror')) throw new Error('Not a valid GPX file');
+  if(doc.querySelector('parsererror')) throw new Error(T`Not a valid GPX file`);
   const get = (el, tag) => el.getElementsByTagName(tag)[0]?.textContent?.trim();
   let nodes = [...doc.getElementsByTagName('trkpt')];
   if(!nodes.length) nodes = [...doc.getElementsByTagName('rtept')];
-  if(!nodes.length) throw new Error('No track or route points in this GPX');
+  if(!nodes.length) throw new Error(T`No track or route points in this GPX`);
   const pts = nodes.map(n => { const e = get(n, 'ele'); return [+n.getAttribute('lat'), +n.getAttribute('lon'), e != null && e !== '' ? +e : null]; })
     .filter(p => isFinite(p[0]) && isFinite(p[1]));
   const trk = doc.getElementsByTagName('trk')[0] || doc.getElementsByTagName('rte')[0];
-  const name = (trk && get(trk, 'name')) || get(doc, 'name') || (fname || 'Imported track').replace(/\.gpx$/i, '');
+  const name = (trk && get(trk, 'name')) || get(doc, 'name') || (fname || T`Imported track`).replace(/\.gpx$/i, '');
   return prepTrack({id:'g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), source:'gpx', name, sport:'hike', pts, dirs:null, created:Date.now()});
 }
 function toGPX(t){
@@ -1248,7 +1306,7 @@ function planTiles(t, p, bufferKm, maxZoom){
 let offlineJob = null;
 async function makeOffline(t, onProg){
   const p = provider(), plan = planTiles(t, p, settings.bufferKm, settings.maxZoom);
-  if(plan.length > 6000) throw new Error(`That's ${plan.length} tiles — reduce the buffer or max zoom in Settings`);
+  if(plan.length > 6000) throw new Error(T`That's ${plan.length} tiles — reduce the buffer or max zoom in Settings`);
   const have = new Set(await dbKeys('tiles'));
   const todo = plan.filter(q => !have.has(q.key));
   let done = 0, fail = 0, bytes = 0; const job = offlineJob = {cancel:false};
@@ -1265,7 +1323,7 @@ async function makeOffline(t, onProg){
   };
   await Promise.all([worker(), worker()]); // max 2 parallel connections (OSM tile policy)
   offlineJob = null;
-  if(job.cancel) throw new Error('Download cancelled');
+  if(job.cancel) throw new Error(T`Download cancelled`);
   t.offline = {pid:p.id, keys:plan.map(q => q.key), date:Date.now(), failed:fail, buffer:settings.bufferKm, maxZoom:Math.min(settings.maxZoom, p.max)};
   await saveTrack(t);
   return {count:plan.length, fail};
@@ -1341,7 +1399,7 @@ function setSheet(mode){ sheet.classList.remove('peek', 'full'); if(mode) sheet.
 new ResizeObserver(() => document.documentElement.style.setProperty('--sheetH', sheet.offsetHeight + 'px')).observe(sheet);
 $('#grab').onclick = () => setSheet(sheet.classList.contains('peek') ? '' : sheet.classList.contains('full') ? 'peek' : 'full');
 document.querySelectorAll('#tabs button').forEach(b => {
-  const t = b.dataset.tab; b.innerHTML = ic({explore:'search', library:'bookmark', settings:'gear'}[t]) + ({explore:'Explore', library:'Saved', settings:'Settings'}[t]);
+  const t = b.dataset.tab; b.innerHTML = ic({explore:'search', library:'bookmark', settings:'gear'}[t]) + '<span></span>';
   b.onclick = () => show(t);
 });
 $('#btnLocate').innerHTML = ic('locate');
@@ -1362,20 +1420,20 @@ function render(){
 /* ---------------- explore ---------------- */
 function searchRadius(){ const b = map.getBounds(), c = map.getCenter();
   return Math.max(1000, Math.min(30000, Math.min(c.distanceTo(L.latLng(b.getNorth(), c.lng)), c.distanceTo(L.latLng(c.lat, b.getEast()))))); }
-function updateSearchHint(){ const h = $('#searchHint'); if(h) h.textContent = map.getZoom() < 9 ? 'Zoom in to the area you want to search' : `Tours starting within ${fmtKm(searchRadius())} of the map center`; }
-const kmOpts = (sel, list) => list.map(v => `<option value="${v}" ${+sel === v ? 'selected' : ''}>${v === 999 ? 'any' : v + ' km'}</option>`).join('');
+function updateSearchHint(){ const h = $('#searchHint'); if(h) h.textContent = map.getZoom() < 9 ? T`Zoom in to the area you want to search` : T`Tours starting within ${fmtKm(searchRadius())} of the map center`; }
+const kmOpts = (sel, list) => list.map(v => `<option value="${v}" ${+sel === v ? 'selected' : ''}>${v === 999 ? T`any` : v + ' km'}</option>`).join('');
 function renderExplore(){
   body.innerHTML = `
     <div class="row">
-      <div class="field" style="flex:1.4"><label>Activity</label><select id="fSport">${Object.entries(SPORTS).map(([k, v]) => `<option value="${k}" ${settings.sport === k ? 'selected' : ''}>${v.label}</option>`).join('')}</select></div>
-      <div class="field"><label>Min</label><select id="fMin">${kmOpts(settings.minKm, [0, 3, 5, 8, 10, 15, 20, 30])}</select></div>
-      <div class="field"><label>Max</label><select id="fMax">${kmOpts(settings.maxKm, [5, 8, 10, 12, 15, 20, 25, 30, 50, 999])}</select></div>
+      <div class="field" style="flex:1.4"><label>${T`Activity`}</label><select id="fSport">${Object.entries(SPORTS).map(([k, v]) => `<option value="${k}" ${settings.sport === k ? 'selected' : ''}>${tt(v.label)}</option>`).join('')}</select></div>
+      <div class="field"><label>${T`Min`}</label><select id="fMin">${kmOpts(settings.minKm, [0, 3, 5, 8, 10, 15, 20, 30])}</select></div>
+      <div class="field"><label>${T`Max`}</label><select id="fMax">${kmOpts(settings.maxKm, [5, 8, 10, 12, 15, 20, 25, 30, 50, 999])}</select></div>
     </div>
-    <div style="margin-top:10px"><button class="btn primary block" data-act="search" ${S.searching ? 'disabled' : ''}>${S.searching ? '<span class="spin"></span> Searching…' : ic('search') + 'Search this area'}</button></div>
+    <div style="margin-top:10px"><button class="btn primary block" data-act="search" ${S.searching ? 'disabled' : ''}>${S.searching ? '<span class="spin"></span> ' + T`Searching…` : ic('search') + T`Search this area`}</button></div>
     <div class="hint" id="searchHint"></div>
     <div class="cards">${S.results.length ? S.results.map(cardHTML).join('') :
-      `<div class="empty">Move the map to where you want to go, then search.<br>You can also import a GPX or a Komoot link under <b>Saved</b>.</div>`}</div>
-    ${S.results.length ? `<div class="hint" style="text-align:center">${S.results.length} shown${S.resultTotal > S.results.length ? ` of ~${S.resultTotal} in this area — zoom in or narrow the length for others` : ''}</div>` : ''}`;
+      `<div class="empty">${T`Move the map to where you want to go, then search.`}<br>${T`You can also import a GPX or a Komoot link under Saved.`}</div>`}</div>
+    ${S.results.length ? `<div class="hint" style="text-align:center">${S.resultTotal > S.results.length ? T`${S.results.length} shown of ~${S.resultTotal} in this area — zoom in or narrow the length for others` : T`${S.results.length} shown`}</div>` : ''}`;
   updateSearchHint();
   ['fSport', 'fMin', 'fMax'].forEach(id => $('#'+id).onchange = e => {
     settings[{fSport:'sport', fMin:'minKm', fMax:'maxKm'}[id]] = id === 'fSport' ? e.target.value : +e.target.value; saveSettings(); });
@@ -1384,18 +1442,18 @@ function cardHTML(r){
   return `<button class="card ${S.sel === r.id ? 'sel' : ''}" style="--c:${r.color}" data-act="open" data-id="${esc(r.id)}">
     <span class="sw" style="background:${r.color}"></span>
     <div class="grow"><div class="t">${esc(r.name)}</div>
-    <div class="m">${fmtKm(r.distance)} · ${fmtDur(r.duration)} · ↑${Math.round(r.up || 0)} m${r.from < 1e8 ? ` · ${fmtKm(r.from)} away` : ''}${r.ratings ? ` · ★ ${(+r.rating).toFixed(1)}` : ''}</div></div>
-    ${r.grade ? `<span class="badge g-${esc(r.grade)}">${esc(r.grade)}</span>` : ''}</button>`;
+    <div class="m">${fmtKm(r.distance)} · ${fmtDur(r.duration)} · ↑${Math.round(r.up || 0)} m${r.from < 1e8 ? ' · ' + T`${fmtKm(r.from)} away` : ''}${r.ratings ? ` · ★ ${(+r.rating).toFixed(1)}` : ''}</div></div>
+    ${r.grade ? `<span class="badge g-${esc(r.grade)}">${esc(tt(r.grade))}</span>` : ''}</button>`;
 }
 async function doSearch(){
-  if(map.getZoom() < 9){ toast('Zoom in a bit first'); return; }
+  if(map.getZoom() < 9){ toast(T`Zoom in a bit first`); return; }
   S.searching = true; render();
   try{
     const minM = settings.minKm * 1000, maxM = settings.maxKm >= 999 ? 1e7 : settings.maxKm * 1000;
     const {list, total} = await komootSearch(map.getCenter(), searchRadius(), settings.sport, minM, Math.max(maxM, minM + 1000));
     S.results = list; S.resultTotal = total; S.sel = null;
     drawResults();
-    if(!list.length) toast('No tours found here — try a larger area or other lengths');
+    if(!list.length) toast(T`No tours found here — try a larger area or other lengths`);
   }catch(e){ toast(e.message); }
   S.searching = false; if(S.view === 'explore') render();
 }
@@ -1487,28 +1545,28 @@ function profileSVG(t, at){
 
 async function renderDetail(){
   const t = S.current; if(!t) return show(S.prevView);
-  const head = `<div class="dhead"><button class="iconbtn" data-act="back" aria-label="Back">${ic('back')}</button><h2 style="flex:1">${esc(t.name)}</h2></div>`;
+  const head = `<div class="dhead"><button class="iconbtn" data-act="back" aria-label="${T`Back`}">${ic('back')}</button><h2 style="flex:1">${esc(t.name)}</h2></div>`;
   const stats = `<div class="stats">
-    <div class="stat"><b>${fmtKm(t.distance)}</b><span>distance</span></div>
-    <div class="stat"><b>${t.up != null ? Math.round(t.up) + ' m' : '–'}</b><span>ascent</span></div>
-    <div class="stat"><b>${fmtDur(t.duration || (t.distance / (SPORTS[t.sport]?.kmh || 4.5) * 3.6))}</b><span>time</span></div>
-    <div class="stat"><b class="g-${esc(t.grade || '')}" style="font-size:14px;line-height:21px">${esc(t.grade || (t.source === 'gpx' ? 'GPX' : '–'))}</b><span>${t.grade ? 'grade' : 'source'}</span></div></div>`;
-  if(t.loading){ body.innerHTML = head + stats + `<div class="empty"><span class="spin"></span><br>Loading route…</div>`; return; }
+    <div class="stat"><b>${fmtKm(t.distance)}</b><span>${T`distance`}</span></div>
+    <div class="stat"><b>${t.up != null ? Math.round(t.up) + ' m' : '–'}</b><span>${T`ascent`}</span></div>
+    <div class="stat"><b>${fmtDur(t.duration || (t.distance / (SPORTS[t.sport]?.kmh || 4.5) * 3.6))}</b><span>${T`time`}</span></div>
+    <div class="stat"><b class="g-${esc(t.grade || '')}" style="font-size:14px;line-height:21px">${esc(t.grade ? tt(t.grade) : (t.source === 'gpx' ? 'GPX' : '–'))}</b><span>${t.grade ? T`grade` : T`source`}</span></div></div>`;
+  if(t.loading){ body.innerHTML = head + stats + `<div class="empty"><span class="spin"></span><br>${T`Loading route…`}</div>`; return; }
   const saved = await isSaved(t); t.saved = saved;
   if(S.view !== 'detail' || S.current !== t) return;
   const off = t.offline, offOk = off && off.pid;
   const offProv = offOk ? (providerById(off.pid)?.name || off.pid) : '';
   body.innerHTML = head + stats + detailTop(t) + profileSVG(t) + `
-    <button class="btn primary block" data-act="nav" style="height:52px;font-size:17px">${ic('play')} Start navigation</button>
+    <button class="btn primary block" data-act="nav" style="height:52px;font-size:17px">${ic('play')} ${T`Start navigation`}</button>
     <div class="grid2" style="margin-top:8px">
-      <button class="btn" data-act="save">${ic(saved ? 'bookmarked' : 'bookmark')}${saved ? 'Saved' : 'Save'}</button>
-      <button class="btn" data-act="offline" ${S.offProg ? 'disabled' : ''}>${ic('cloud')}${offOk ? 'Offline ✓' : 'Make offline'}</button>
-      <button class="btn" data-act="gpx">${ic('down')}Export GPX</button>
-      <button class="btn" data-act="share">${ic('share')}Share GPX</button>
-      <button class="btn" data-act="gmaps">${ic('car')}Drive to start</button>
-      <button class="btn" data-act="reverse">${ic('swap')}Reverse</button>
+      <button class="btn" data-act="save">${ic(saved ? 'bookmarked' : 'bookmark')}${saved ? T`Saved` : T`Save`}</button>
+      <button class="btn" data-act="offline" ${S.offProg ? 'disabled' : ''}>${ic('cloud')}${offOk ? T`Offline ✓` : T`Make offline`}</button>
+      <button class="btn" data-act="gpx">${ic('down')}${T`Export GPX`}</button>
+      <button class="btn" data-act="share">${ic('share')}${T`Share GPX`}</button>
+      <button class="btn" data-act="gmaps">${ic('car')}${T`Drive to start`}</button>
+      <button class="btn" data-act="reverse">${ic('swap')}${T`Reverse`}</button>
       ${t.komootId ? `<button class="btn" data-act="komoot">${ic('ext')}Komoot</button>` : ''}
-      ${saved ? `<button class="btn danger" data-act="delete">${ic('trash')}Delete</button>` : ''}
+      ${saved ? `<button class="btn danger" data-act="delete">${ic('trash')}${T`Delete`}</button>` : ''}
     </div>
     <div id="offBox">${offBox(t)}</div>
     ${detailExtras(t)}`;
@@ -1520,28 +1578,28 @@ function detailTop(t){
   let h = '';
   const chips = [];
   if(t.rating) chips.push(`<span class="chip">★ ${(+t.rating.score).toFixed(1)} (${t.rating.count})</span>`);
-  if(t.visitors) chips.push(`<span class="chip">${t.visitors} hiked it</span>`);
-  if(t.author) chips.push(`<span class="chip">by ${esc(t.author)}</span>`);
+  if(t.visitors) chips.push(`<span class="chip">${T`${t.visitors} hiked it`}</span>`);
+  if(t.author) chips.push(`<span class="chip">${T`by ${esc(t.author)}`}</span>`);
   for(const a of t.areas || []) chips.push(`<span class="chip">🌿 ${esc(a)}</span>`);
   if(chips.length) h += `<div class="meta">${chips.join('')}</div>`;
   if(t.photos?.length) h += `<div class="photos" style="margin-bottom:8px">${t.photos.map((p, k) =>
-    `<button data-act="photo" data-i="${k}" aria-label="Photo ${k + 1}"><img loading="lazy" src="${esc(imgUrl(p.src, 280, 200))}" alt=""></button>`).join('')}</div>`;
-  else if(t.komootId && navigator.onLine && !t.photosTried) h += `<div class="hint">Loading photos…</div>`;
+    `<button data-act="photo" data-i="${k}" aria-label="${T`Photo ${k + 1}`}"><img loading="lazy" src="${esc(imgUrl(p.src, 280, 200))}" alt=""></button>`).join('')}</div>`;
+  else if(t.komootId && navigator.onLine && !t.photosTried) h += `<div class="hint">${T`Loading photos…`}</div>`;
   return h;
 }
 function detailExtras(t){
   let h = '';
   if(t.desc){
-    h += `<h3>About this route</h3>${t.desc.short && t.desc.text && !t.desc.text.startsWith(t.desc.short.slice(0, 40)) ? `<p class="desc" style="font-weight:600;margin-bottom:6px">${esc(t.desc.short)}</p>` : ''}
-      <p class="desc clamp" id="descText">${esc(t.desc.text || t.desc.short)}</p><button class="linkbtn" id="descMore" data-act="descMore">Read more</button>
-      ${t.desc.attribution ? `<div class="hint">${esc(t.desc.attribution)}</div>` : ''}`;
+    h += `<h3>${T`About this route`}</h3>${t.desc.short && t.desc.text && !t.desc.text.startsWith(t.desc.short.slice(0, 40)) ? `<p class="desc" style="font-weight:600;margin-bottom:6px">${esc(t.desc.short)}</p>` : ''}
+      <p class="desc clamp" id="descText">${esc(t.desc.text || t.desc.short)}</p><button class="linkbtn" id="descMore" data-act="descMore">${T`Read more`}</button>
+      ${t.desc.translatedFrom ? `<div class="hint">${esc(t.desc.by ? T`Translated by ${t.desc.by} from ${t.desc.translatedFrom}` : T`Translated from ${t.desc.translatedFrom}`)}</div>` : ''}`;
   }
   if(t.highlights?.length){
-    h += `<h3>Along the way</h3>` + t.highlights.map((x, k) => {
+    h += `<h3>${T`Along the way`}</h3>` + t.highlights.map((x, k) => {
       const km = t.cum && x.i != null && x.i < t.cum.length ? fmtKm(t.cum[x.i]) : '';
       return `<button class="hl" data-act="hl" data-i="${k}">
         <span class="n" style="background:${t.color || TRACK_COLOR}">${k + 1}</span>
-        <div class="grow"><div class="t">${esc(x.name)}</div><div class="m">${[km && 'at ' + km, esc(x.cat)].filter(Boolean).join(' · ')}</div>
+        <div class="grow"><div class="t">${esc(x.name)}</div><div class="m">${[km && T`at ${km}`, esc(tt(x.cat))].filter(Boolean).join(' · ')}</div>
         ${x.intro ? `<div class="m" style="color:var(--ink)">${esc(x.intro)}</div>` : ''}
         ${x.tips?.length ? `<div class="tips">${x.tips.map(tp => `<p>${esc(tp)}</p>`).join('')}</div>` : ''}</div>
         ${x.imgs?.[0] ? `<img class="th" loading="lazy" src="${esc(imgUrl(x.imgs[0], 128, 96))}" alt="">` : ''}</button>`;
@@ -1549,9 +1607,9 @@ function detailExtras(t){
   }
   if(t.surfaces?.length){
     const top = t.surfaces.filter(x => x.amount > .02);
-    h += `<h3>Surface</h3><div class="sfbar">${top.map(x => `<span style="width:${x.amount * 100}%;background:${SURF_COL[x.type] || '#bbb'}"></span>`).join('')}</div>
-      <div class="sfleg">${top.slice(0, 6).map(x => `<span><i style="background:${SURF_COL[x.type] || '#bbb'}"></i>${esc(x.type)} ${Math.round(x.amount * 100)}%</span>`).join('')}</div>`;
-    if(t.wayTypes?.length) h += `<div class="hint">Mostly ${t.wayTypes.filter(x => x.amount > .05).slice(0, 3).map(x => `${esc(x.type)} (${Math.round(x.amount * 100)}%)`).join(', ')}</div>`;
+    h += `<h3>${T`Surface`}</h3><div class="sfbar">${top.map(x => `<span style="width:${x.amount * 100}%;background:${SURF_COL[x.type] || '#bbb'}"></span>`).join('')}</div>
+      <div class="sfleg">${top.slice(0, 6).map(x => `<span><i style="background:${SURF_COL[x.type] || '#bbb'}"></i>${esc(tt(x.type))} ${Math.round(x.amount * 100)}%</span>`).join('')}</div>`;
+    if(t.wayTypes?.length) h += `<div class="hint">${T`Mostly ${t.wayTypes.filter(x => x.amount > .05).slice(0, 3).map(x => `${esc(tt(x.type))} (${Math.round(x.amount * 100)}%)`).join(', ')}`}</div>`;
   }
   return h;
 }
@@ -1573,24 +1631,24 @@ function openPhoto(k){
 }
 function offBox(t){
   if(S.offProg){ const {done, total, fail} = S.offProg; const pct = total ? Math.round(done / total * 100) : 0;
-    return `<h3>Downloading map</h3><div class="progress"><i style="width:${pct}%"></i></div>
-      <div class="row" style="justify-content:space-between"><span class="hint">${done} / ${total} tiles${fail ? ` · ${fail} failed` : ''}</span><button class="btn" data-act="cancelOff">Cancel</button></div>`; }
+    return `<h3>${T`Downloading map`}</h3><div class="progress"><i style="width:${pct}%"></i></div>
+      <div class="row" style="justify-content:space-between"><span class="hint">${T`${done} / ${total} tiles`}${fail ? ' · ' + T`${fail} failed` : ''}</span><button class="btn" data-act="cancelOff">${T`Cancel`}</button></div>`; }
   const off = t.offline;
-  if(off?.pid) return `<div class="hint">Offline map: ${off.keys.length} tiles, ${off.buffer} km around the route up to zoom ${off.maxZoom} (${esc(providerById(off.pid)?.name || off.pid)})${off.failed ? ` — ${off.failed} tiles failed, tap Make offline to retry` : ''}.</div>`;
+  if(off?.pid) return `<div class="hint">${T`Offline map: ${off.keys.length} tiles, ${off.buffer} km around the route up to zoom ${off.maxZoom} (${esc(providerById(off.pid)?.name || off.pid)})`}${off.failed ? ' — ' + T`${off.failed} tiles failed, tap Make offline to retry` : ''}.</div>`;
   const n = planTiles(t, provider(), settings.bufferKm, settings.maxZoom).length;
-  return `<div class="hint">Make offline saves the route plus ~${settings.bufferKm} km of map around it (${n} tiles, ≈${Math.max(1, Math.round(n * provider().kb / 1024))} MB) so you can find another way back without signal.</div>`;
+  return `<div class="hint">${T`Make offline saves the route plus ~${settings.bufferKm} km of map around it (${n} tiles, ≈${Math.max(1, Math.round(n * provider().kb / 1024))} MB) so you can find another way back without signal.`}</div>`;
 }
 function refreshOffBox(){ const b = $('#offBox'); if(b && S.current) b.innerHTML = offBox(S.current); }
 
 async function startOffline(t){
-  if(!navigator.onLine){ toast('You are offline'); return; }
+  if(!navigator.onLine){ toast(T`You are offline`); return; }
   if(!t.saved){ await saveTrack(t); }
   navigator.storage?.persist?.();
   S.offProg = {done:0, total:0, fail:0}; render();
   try{
     const r = await makeOffline(t, (done, total, fail) => { S.offProg = {done, total, fail}; refreshOffBox(); });
     S.offProg = null;
-    toast(r.fail ? `Offline map saved (${r.fail} tiles failed)` : 'Offline map saved ✓');
+    toast(r.fail ? T`Offline map saved (${r.fail} tiles failed)` : T`Offline map saved ✓`);
     if(provider().id !== base.options.pid) setBase();
   }catch(e){ S.offProg = null; toast(e.message); }
   if(S.view === 'detail') render();
@@ -1605,7 +1663,7 @@ async function shareGPX(t){
     }
   }
   downloadBlob(new Blob([text], {type:'application/gpx+xml'}), name);
-  toast('Sharing files isn’t supported here — GPX downloaded instead');
+  toast(T`Sharing files isn’t supported here — GPX downloaded instead`);
 }
 
 /* ---------------- library ---------------- */
@@ -1614,27 +1672,27 @@ async function renderLibrary(){
   if(S.view !== 'library') return;
   body.innerHTML = `
     <div class="grid2">
-      <button class="btn" data-act="importGpx">${ic('up')}Import GPX</button>
-      <button class="btn" data-act="importLink">${ic('link')}Komoot link</button>
+      <button class="btn" data-act="importGpx">${ic('up')}${T`Import GPX`}</button>
+      <button class="btn" data-act="importLink">${ic('link')}${T`Komoot link`}</button>
     </div>
-    <form id="linkForm" class="row hidden" style="margin-top:8px"><input type="url" id="linkIn" placeholder="komoot.com/tour/… or tour ID" style="flex:1"><button class="btn primary">Load</button></form>
+    <form id="linkForm" class="row hidden" style="margin-top:8px"><input type="url" id="linkIn" placeholder="${T`komoot.com/tour/… or tour ID`}" style="flex:1"><button class="btn primary">${T`Load`}</button></form>
     <div class="cards">${all.length ? all.map(t => `<button class="card" data-act="openSaved" data-id="${esc(t.id)}">
-      <div class="grow"><div class="t">${esc(t.name)}</div><div class="m">${fmtKm(t.distance)}${t.up != null ? ` · ↑${t.up} m` : ''} · ${t.source === 'gpx' ? 'GPX' : 'Komoot'} · ${new Date(t.created).toLocaleDateString()}</div></div>
-      ${t.offline?.pid ? '<span class="badge off">offline</span>' : ''}</button>`).join('') : `<div class="empty">No saved routes yet.<br>Save one from Explore, or import a GPX.</div>`}</div>`;
+      <div class="grow"><div class="t">${esc(t.name)}</div><div class="m">${fmtKm(t.distance)}${t.up != null ? ` · ↑${t.up} m` : ''} · ${t.source === 'gpx' ? 'GPX' : 'Komoot'} · ${new Date(t.created).toLocaleDateString(LANG)}</div></div>
+      ${t.offline?.pid ? '<span class="badge off">offline</span>' : ''}</button>`).join('') : `<div class="empty">${T`No saved routes yet.`}<br>${T`Save one from Explore, or import a GPX.`}</div>`}</div>`;
   $('#linkForm').onsubmit = e => { e.preventDefault(); importLink($('#linkIn').value); };
 }
 async function importLink(v){
   v = (v || '').trim(); if(!v) return;
   const m = v.match(/(smarttour|tour)s?\/(e?\d+)/i) || v.match(/^(e?\d+)$/);
-  if(!m){ toast('Paste a komoot.com tour link or ID'); return; }
+  if(!m){ toast(T`Paste a komoot.com tour link or ID`); return; }
   const kind = m.length === 3 ? m[1].toLowerCase() : null, id = m.length === 3 ? m[2] : m[1];
-  toast('Loading…', 8000);
+  toast(T`Loading…`, 8000);
   try{
     let t;
     if(kind === 'smarttour' || id.startsWith('e')) t = await fetchDiscoverTour(id);
     else { try{ t = await fetchUserTour(id); }catch(e){ if(kind === 'tour') throw e; t = await fetchDiscoverTour(id); } }
-    if(!t.pts.length) throw new Error('Tour has no coordinates');
-    toast('Loaded', 1200); await saveTrack(t); openTrack(t); loadPhotos(t);
+    if(!t.pts.length) throw new Error(T`Tour has no coordinates`);
+    toast(T`Loaded`, 1200); await saveTrack(t); openTrack(t); loadPhotos(t);
   }catch(e){ toast(e.message); }
 }
 async function importFiles(files){
@@ -1643,7 +1701,7 @@ async function importFiles(files){
     try{ const t = parseGPX(await f.text(), f.name); await saveTrack(t); last = t; }
     catch(e){ toast(`${f.name}: ${e.message}`); }
   }
-  if(last){ toast(files.length > 1 ? `Imported ${files.length} files` : 'GPX imported'); openTrack(last); }
+  if(last){ toast(files.length > 1 ? T`Imported ${files.length} files` : T`GPX imported`); openTrack(last); }
 }
 $('#gpxFile').onchange = e => { importFiles([...e.target.files]); e.target.value = ''; };
 
@@ -1655,28 +1713,32 @@ async function renderSettings(){
   if(S.view !== 'settings') return;
   const opt = (v, cur, label) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${label}</option>`;
   body.innerHTML = `
-    <h3 style="margin-top:4px">Map</h3>
-    <div class="field"><label>Map style</label><select id="sProv">
-      ${Object.values(PROVIDERS).map(p => opt(p.id, settings.provider, p.name)).join('')}${opt('custom', settings.provider, 'Custom tile URL…')}</select></div>
-    <div class="field ${settings.provider === 'custom' ? '' : 'hidden'}" style="margin-top:8px" id="customBox"><label>Tile URL ({z}/{x}/{y}, optional {s})</label><input type="url" id="sCustom" value="${esc(settings.customUrl)}" placeholder="https://…/{z}/{x}/{y}.png?key=…"></div>
-    <h3>Offline maps</h3>
+    <h3 style="margin-top:4px">${T`Language`}</h3>
+    <div class="field"><select id="sLang">${opt('auto', settings.lang, T`Automatic (device)`)}${Object.entries(LANGS).map(([k, v]) => opt(k, settings.lang, v)).join('')}</select></div>
+    <div class="hint">${T`Applies to the app and to route names, descriptions and tips. Saved routes are kept.`}</div>
+    <h3>${T`Map`}</h3>
+    <div class="field"><label>${T`Map style`}</label><select id="sProv">
+      ${Object.values(PROVIDERS).map(p => opt(p.id, settings.provider, p.name)).join('')}${opt('custom', settings.provider, T`Custom tile URL…`)}</select></div>
+    <div class="field ${settings.provider === 'custom' ? '' : 'hidden'}" style="margin-top:8px" id="customBox"><label>${T`Tile URL`} ({z}/{x}/{y}, {s})</label><input type="url" id="sCustom" value="${esc(settings.customUrl)}" placeholder="https://…/{z}/{x}/{y}.png?key=…"></div>
+    <h3>${T`Offline maps`}</h3>
     <div class="row">
-      <div class="field"><label>Area around route</label><select id="sBuf">${[0.5, 1, 1.5, 2, 3, 5].map(v => opt(v, settings.bufferKm, v + ' km')).join('')}</select></div>
-      <div class="field"><label>Max detail</label><select id="sZoom">${opt(15, settings.maxZoom, 'Zoom 15')}${opt(16, settings.maxZoom, 'Zoom 16')}${opt(17, settings.maxZoom, 'Zoom 17 (near route)')}</select></div>
+      <div class="field"><label>${T`Area around route`}</label><select id="sBuf">${[0.5, 1, 1.5, 2, 3, 5].map(v => opt(v, settings.bufferKm, v + ' km')).join('')}</select></div>
+      <div class="field"><label>${T`Max detail`}</label><select id="sZoom">${opt(15, settings.maxZoom, 'Zoom 15')}${opt(16, settings.maxZoom, 'Zoom 16')}${opt(17, settings.maxZoom, T`Zoom 17 (near route)`)}</select></div>
     </div>
-    <h3>Navigation</h3>
-    <div class="field"><label>Off-route warning after</label><select id="sOff">${[25, 40, 60, 100].map(v => opt(v, settings.offThresh, v + ' m')).join('')}</select></div>
-    <label class="switch">Vibrate on turns and off-route<input type="checkbox" id="sVib" ${settings.vibrate ? 'checked' : ''}></label>
-    <label class="switch">Beep when off route<input type="checkbox" id="sSnd" ${settings.sound ? 'checked' : ''}></label>
-    <h3>Storage</h3>
-    <div class="kv"><span>Offline tiles</span><b>${tileCount}</b></div>
-    <div class="kv"><span>Used by this app</span><b>${est ? (est.usage / 1048576).toFixed(1) + ' MB' : '–'}</b></div>
-    <div class="kv"><span>Protected from cleanup</span><b>${persisted ? 'Yes' : 'No'}</b></div>
+    <h3>${T`Navigation`}</h3>
+    <div class="field"><label>${T`Off-route warning after`}</label><select id="sOff">${[25, 40, 60, 100].map(v => opt(v, settings.offThresh, v + ' m')).join('')}</select></div>
+    <label class="switch">${T`Vibrate on turns and off-route`}<input type="checkbox" id="sVib" ${settings.vibrate ? 'checked' : ''}></label>
+    <label class="switch">${T`Beep when off route`}<input type="checkbox" id="sSnd" ${settings.sound ? 'checked' : ''}></label>
+    <h3>${T`Storage`}</h3>
+    <div class="kv"><span>${T`Offline tiles`}</span><b>${tileCount}</b></div>
+    <div class="kv"><span>${T`Used by this app`}</span><b>${est ? (est.usage / 1048576).toFixed(1) + ' MB' : '–'}</b></div>
+    <div class="kv"><span>${T`Protected from cleanup`}</span><b>${persisted ? T`Yes` : T`No`}</b></div>
     <div class="grid2" style="margin-top:10px">
-      <button class="btn" data-act="persist">Protect storage</button>
-      <button class="btn danger" data-act="clearTiles">Clear offline maps</button>
+      <button class="btn" data-act="persist">${T`Protect storage`}</button>
+      <button class="btn danger" data-act="clearTiles">${T`Clear offline maps`}</button>
     </div>
-    <p class="hint" style="margin-top:14px">Routes come from Komoot’s public (unofficial) API. Map data © OpenStreetMap contributors. GPS only runs while the screen is on — use the screen lock toggle and pocket mode during navigation.</p>`;
+    <p class="hint" style="margin-top:14px">${T`Routes come from Komoot’s public (unofficial) API. Map data © OpenStreetMap contributors. GPS only runs while the screen is on — use the screen lock toggle and pocket mode during navigation.`}</p>`;
+  $('#sLang').onchange = e => setLanguage(e.target.value);
   $('#sProv').onchange = e => { settings.provider = e.target.value; saveSettings(); $('#customBox').classList.toggle('hidden', settings.provider !== 'custom'); setBase(); };
   $('#sCustom').onchange = e => { settings.customUrl = e.target.value.trim(); saveSettings(); setBase(); };
   $('#sBuf').onchange = e => { settings.bufferKm = +e.target.value; saveSettings(); };
@@ -1701,9 +1763,9 @@ function drawPos(){
 }
 function startGPS(){
   if(S.watchId != null) return true;
-  if(!navigator.geolocation){ toast('No GPS available in this browser'); return false; }
+  if(!navigator.geolocation){ toast(T`No GPS available in this browser`); return false; }
   S.watchId = navigator.geolocation.watchPosition(onFix, e => {
-    if(e.code === 1){ toast('Location permission denied'); stopGPS(); } else if(e.code === 2 && !S.pos) toast('Waiting for a GPS signal…');
+    if(e.code === 1){ toast(T`Location permission denied`); stopGPS(); } else if(e.code === 2 && !S.pos) toast(T`Waiting for a GPS signal…`);
   }, {enableHighAccuracy:true, maximumAge:2000, timeout:30000});
   $('#btnLocate').classList.add('on');
   return true;
@@ -1745,7 +1807,7 @@ async function startCompass(){
 /* ---------------- wake lock ---------------- */
 let wakeLock = null;
 async function wakeOn(){
-  if(!('wakeLock' in navigator)){ toast('Keeping the screen on isn’t supported here'); return false; }
+  if(!('wakeLock' in navigator)){ toast(T`Keeping the screen on isn’t supported here`); return false; }
   try{ wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; if(S.view === 'nav') renderNavButtons(); }); return true; }
   catch{ return false; }
 }
@@ -1784,7 +1846,7 @@ async function startNav(t){
   persistNav(true);
   show('nav'); setSheet('');
   $('#navTop').classList.remove('hidden'); $('#topbar').classList.add('hidden');
-  if(S.pos) navUpdate(); else setInstr('far', '…', 'Waiting for GPS', 'Make sure location is on');
+  if(S.pos) navUpdate(); else setInstr('far', '…', T`Waiting for GPS`, T`Make sure location is on`);
   map.removeLayer(resultsLayer);
   if(S.pos){ S.nav.zoomed = true; centerOn(S.pos.ll, 17); } else fitTrack(t);
 }
@@ -1859,37 +1921,38 @@ function updateNavUI(){
   const upLeft = t.hasEle ? Math.max(0, t.cumUp[t.cumUp.length - 1] - t.cumUp[n.idx]) : null;
   if(n.farAway){
     const b = bearing(S.pos.ll, n.nearest);
-    setInstr('far', arrowSVG(b - (S.heading ?? 0)), `Route is ${fmtKm(n.dist)} ${cardinal(b)}`, `Nearest point of the route · start is ${fmtKm(dist(S.pos.ll, t.pts[0]))} away`);
+    setInstr('far', arrowSVG(b - (S.heading ?? 0)), T`Route is ${fmtKm(n.dist)} ${cardinal(b)}`, T`Nearest point of the route · start is ${fmtKm(dist(S.pos.ll, t.pts[0]))} away`);
   } else if(n.off){
     const b = bearing(S.pos.ll, n.nearest);
-    setInstr('off', arrowSVG(b - (S.heading ?? 0)), `Off route · ${fmtKm(n.dist)}`, `Rejoin to the ${cardinal(b)}${S.heading != null ? '' : ' (arrow points north-up)'}`);
+    setInstr('off', arrowSVG(b - (S.heading ?? 0)), T`Off route · ${fmtKm(n.dist)}`, T`Rejoin to the ${cardinal(b)}` + (S.heading != null ? '' : ' ' + T`(arrow points north-up)`));
   } else if(remain < 25){
-    setInstr('', '🏁', 'You have arrived', `${fmtKm(t.length)} done`);
+    setInstr('', '🏁', T`You have arrived`, T`${fmtKm(t.length)} done`);
   } else {
     const nt = nextTurn(t, n.along);
     if(nt && nt.dist < 1500){
       const [txt, deg] = DIRS[nt.type] || ['Continue', 0];
+      const txt2 = tt(txt);
       if(nt.dist < 35 && n.spokenTurn !== nt.i){ n.spokenTurn = nt.i; buzz([90, 80, 90]); }
-      setInstr('', arrowSVG(deg), `${fmtKm(Math.round(nt.dist / 10) * 10)} · ${txt}`, nt.street ? `onto ${esc(nt.street)}` : `then ${fmtKm(remain)} to go`);
+      setInstr('', arrowSVG(deg), `${fmtKm(Math.round(nt.dist / 10) * 10)} · ${txt2}`, nt.street ? T`onto ${esc(nt.street)}` : T`then ${fmtKm(remain)} to go`);
     } else {
       const ahead = pointAt(t, Math.min(t.length, n.along + 80)), b = bearing(S.pos.ll, ahead);
-      setInstr('', arrowSVG(b - (S.heading ?? b)), nt ? `Follow the route · ${fmtKm(nt.dist)}` : 'Follow the route', `heading ${cardinal(b)} · ${fmtKm(remain)} to go`);
+      setInstr('', arrowSVG(b - (S.heading ?? b)), nt ? T`Follow the route · ${fmtKm(nt.dist)}` : T`Follow the route`, T`heading ${cardinal(b)} · ${fmtKm(remain)} to go`);
     }
   }
   const box = $('#navStats');
   if(box){
-    box.innerHTML = `<div class="stat"><b>${fmtKm(n.along)}</b><span>done</span></div>
-      <div class="stat"><b>${fmtKm(remain)}</b><span>to go</span></div>
-      <div class="stat"><b>${fmtClock(Date.now() + eta * 1000)}</b><span>arrive ~${fmtDur(eta)}</span></div>`;
-    $('#navProf').innerHTML = profileSVG(t, n.along) + (upLeft != null ? `<div class="hint" style="margin-top:-6px">↑ ${Math.round(upLeft)} m climbing left · GPS ±${Math.round(S.pos?.acc || 0)} m</div>` : '');
+    box.innerHTML = `<div class="stat"><b>${fmtKm(n.along)}</b><span>${T`done`}</span></div>
+      <div class="stat"><b>${fmtKm(remain)}</b><span>${T`to go`}</span></div>
+      <div class="stat"><b>${fmtClock(Date.now() + eta * 1000)}</b><span>${T`arrive ~${fmtDur(eta)}`}</span></div>`;
+    $('#navProf').innerHTML = profileSVG(t, n.along) + (upLeft != null ? `<div class="hint" style="margin-top:-6px">${T`↑ ${Math.round(upLeft)} m climbing left`} · GPS ±${Math.round(S.pos?.acc || 0)} m</div>` : '');
     if(n.wayback) $('#wbInfo').innerHTML = waybackText();
   }
   // pocket overlay
   const pk = $('#pocket');
   pk.classList.toggle('off', !!n.off);
-  $('#pkTop').textContent = n.off ? 'OFF ROUTE' : n.farAway ? 'Away from route' : 'To go';
+  $('#pkTop').textContent = n.off ? T`OFF ROUTE` : n.farAway ? T`Away from route` : T`To go`;
   $('#pkBig').textContent = n.off ? fmtKm(n.dist) : fmtKm(remain);
-  $('#pkSub').textContent = n.off ? `Rejoin to the ${cardinal(bearing(S.pos.ll, n.nearest))}` : `arrive ~${fmtClock(Date.now() + eta * 1000)}`;
+  $('#pkSub').textContent = n.off ? T`Rejoin to the ${cardinal(bearing(S.pos.ll, n.nearest))}` : T`arrive ~${fmtClock(Date.now() + eta * 1000)}`;
 }
 function setInstr(cls, arrow, big, small){
   const el = $('#instr'); el.className = 'instr ' + cls;
@@ -1899,9 +1962,9 @@ function waybackText(){
   const n = S.nav, t = S.current; if(!S.pos) return '';
   const back = n.along + (n.dist || 0), fwd = t.length - n.along + (n.dist || 0), straight = dist(S.pos.ll, t.pts[0]);
   const loop = dist(t.pts[0], t.pts[t.pts.length - 1]) < 150;
-  return `<div class="kv"><span>Back the way you came</span><b>${fmtKm(back)}</b></div>
-    <div class="kv"><span>${loop ? 'Finish the loop' : 'Continue to the end'}</span><b>${fmtKm(fwd)}</b></div>
-    <div class="kv"><span>Start, straight line</span><b>${fmtKm(straight)} ${cardinal(bearing(S.pos.ll, t.pts[0]))}</b></div>`;
+  return `<div class="kv"><span>${T`Back the way you came`}</span><b>${fmtKm(back)}</b></div>
+    <div class="kv"><span>${loop ? T`Finish the loop` : T`Continue to the end`}</span><b>${fmtKm(fwd)}</b></div>
+    <div class="kv"><span>${T`Start, straight line`}</span><b>${fmtKm(straight)} ${cardinal(bearing(S.pos.ll, t.pts[0]))}</b></div>`;
 }
 function drawWayback(){
   const n = S.nav, t = S.current;
@@ -1919,19 +1982,19 @@ function renderNav(){
     <div id="wbInfo" class="${S.nav?.wayback ? '' : 'hidden'}"></div>
     <div class="grid2" id="navBtns" style="margin-top:8px"></div>`;
   renderNavButtons(); if(S.pos) updateNavUI();
-  else { $('#navStats').innerHTML = '<div class="empty" style="grid-column:1/-1">Waiting for GPS…</div>'; $('#navProf').innerHTML = profileSVG(t); }
+  else { $('#navStats').innerHTML = '<div class="empty" style="grid-column:1/-1">' + T`Waiting for GPS…` + '</div>'; $('#navProf').innerHTML = profileSVG(t); }
 }
 function renderNavButtons(){
   const b = $('#navBtns'); if(!b) return; const n = S.nav;
   b.innerHTML = `
-    <button class="btn" data-act="pocket">${ic('moon')}Pocket mode</button>
-    <button class="btn ${wakeLock ? 'primary' : ''}" data-act="wake">${ic('sun')}${wakeLock ? 'Screen stays on' : 'Screen may sleep'}</button>
-    <button class="btn ${n?.wayback ? 'primary' : ''}" data-act="wayback">${ic('home')}Way back</button>
-    <button class="btn" data-act="walkStart">${ic('ext')}Walk to start (Maps)</button>
-    <button class="btn danger" data-act="stopNav" style="grid-column:1/-1">${ic('stop')}Stop navigation</button>`;
+    <button class="btn" data-act="pocket">${ic('moon')}${T`Pocket mode`}</button>
+    <button class="btn ${wakeLock ? 'primary' : ''}" data-act="wake">${ic('sun')}${wakeLock ? T`Screen stays on` : T`Screen may sleep`}</button>
+    <button class="btn ${n?.wayback ? 'primary' : ''}" data-act="wayback">${ic('home')}${T`Way back`}</button>
+    <button class="btn" data-act="walkStart">${ic('ext')}${T`Walk to start (Maps)`}</button>
+    <button class="btn danger" data-act="stopNav" style="grid-column:1/-1">${ic('stop')}${T`Stop navigation`}</button>`;
   $('#wbInfo')?.classList.toggle('hidden', !n?.wayback);
 }
-map.on('dragstart', () => { if(S.nav && S.follow){ S.follow = false; const r = $('#btnRecenter'); r.innerHTML = ic('compass') + 'Recenter'; r.classList.remove('hidden'); } });
+map.on('dragstart', () => { if(S.nav && S.follow){ S.follow = false; const r = $('#btnRecenter'); r.innerHTML = ic('compass') + T`Recenter`; r.classList.remove('hidden'); } });
 
 /* pocket mode: black screen, keeps wake lock, double-tap to exit */
 let pkTap = 0;
@@ -1954,8 +2017,8 @@ document.addEventListener('click', async e => {
     case 'back': S.current = null; trackLayer.clearLayers(); S.sel = null; highlightResult(); show(S.prevView); break;
     case 'nav': startNav(t); break;
     case 'save':
-      if(t.saved){ toast('Already saved — use Delete to remove'); break; }
-      await saveTrack(t); navigator.storage?.persist?.(); toast('Saved'); render(); break;
+      if(t.saved){ toast(T`Already saved — use Delete to remove`); break; }
+      await saveTrack(t); navigator.storage?.persist?.(); toast(T`Saved`); render(); break;
     case 'offline': startOffline(t); break;
     case 'cancelOff': if(offlineJob) offlineJob.cancel = true; break;
     case 'gpx': downloadBlob(new Blob([toGPX(t)], {type:'application/gpx+xml'}), slug(t.name) + '.gpx'); break;
@@ -1965,10 +2028,10 @@ document.addEventListener('click', async e => {
     case 'reverse': {
       const n0 = t.pts.length; t.pts = t.pts.slice().reverse(); t.dirs = null; const up = t.up; t.up = t.down; t.down = up;
       if(t.highlights) t.highlights = t.highlights.map(h => ({...h, i:h.i != null ? n0 - 1 - h.i : h.i})).reverse();
-      prepTrack(t); if(t.saved) await saveTrack(t); drawTrack(t); render(); toast('Direction reversed (turn hints are off for reversed routes)'); break; }
+      prepTrack(t); if(t.saved) await saveTrack(t); drawTrack(t); render(); t.reversed = !t.reversed; if(t.saved) await saveTrack(t); toast(T`Direction reversed (turn hints are off for reversed routes)`); break; }
     case 'delete':
-      if(!confirm(`Delete “${t.name}”${t.offline?.pid ? ' and its offline map' : ''}?`)) break;
-      await releaseTiles(t); await dbDel('tracks', t.id); t.saved = false; delete t.offline; toast('Deleted');
+      if(!confirm(t.offline?.pid ? T`Delete “${t.name}” and its offline map?` : T`Delete “${t.name}”?`)) break;
+      await releaseTiles(t); await dbDel('tracks', t.id); t.saved = false; delete t.offline; toast(T`Deleted`);
       if(S.results.find(r => 'k' + r.id === t.id)) render(); else { S.current = null; trackLayer.clearLayers(); show('library'); }
       break;
     case 'importGpx': $('#gpxFile').click(); break;
@@ -1977,19 +2040,19 @@ document.addEventListener('click', async e => {
       if(S.watchId != null && !S.nav){ stopGPS(); break; }
       firstFix = true; if(startGPS() && S.pos) map.setView(S.pos.ll, Math.max(map.getZoom(), 15)); break;
     case 'recenter': S.follow = true; el.classList.add('hidden'); if(S.pos) centerOn(S.pos.ll, Math.max(map.getZoom(), 16)); break;
-    case 'stopNav': if(confirm('Stop navigation?')) stopNav(); break;
+    case 'stopNav': if(confirm(T`Stop navigation?`)) stopNav(); break;
     case 'pocket': if(!wakeLock) await wakeOn(); $('#pocket').classList.remove('hidden'); updateNavUI(); renderNavButtons(); break;
     case 'wake': if(wakeLock){ S.nav.wantWake = false; wakeOff(); } else { S.nav.wantWake = true; await wakeOn(); } renderNavButtons(); break;
     case 'wayback': S.nav.wayback = !S.nav.wayback; drawWayback(); renderNavButtons(); updateNavUI(); break;
     case 'walkStart': {
       const o = S.pos ? `&origin=${S.pos.ll[0].toFixed(6)},${S.pos.ll[1].toFixed(6)}` : '';
       window.open(`https://www.google.com/maps/dir/?api=1${o}&destination=${t.pts[0][0].toFixed(6)},${t.pts[0][1].toFixed(6)}&travelmode=walking`, '_blank'); break; }
-    case 'persist': { const ok = await navigator.storage?.persist?.(); toast(ok ? 'Storage protected' : 'Browser declined — installing the app usually helps'); render(); break; }
+    case 'persist': { const ok = await navigator.storage?.persist?.(); toast(ok ? T`Storage protected` : T`Browser declined — installing the app usually helps`); render(); break; }
     case 'clearTiles':
-      if(!confirm('Remove all offline maps?')) break;
+      if(!confirm(T`Remove all offline maps?`)) break;
       await dbDelMany('tiles', await dbKeys('tiles'));
       for(const x of await dbAll('tracks')) if(x.offline){ delete x.offline; await dbPut('tracks', x); }
-      if(S.current) delete S.current.offline; toast('Offline maps cleared'); render(); break;
+      if(S.current) delete S.current.offline; toast(T`Offline maps cleared`); render(); break;
   }
 });
 
@@ -2005,10 +2068,10 @@ $('#placeForm').onsubmit = async e => {
   e.preventDefault(); const q = $('#placeQ').value.trim(); const list = $('#placeList'); if(!q) return;
   list.innerHTML = '<button disabled><span class="spin"></span></button>'; list.classList.remove('hidden');
   try{
-    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=${encodeURIComponent(q)}`, {headers:{'Accept-Language':navigator.language}});
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=${encodeURIComponent(q)}`, {headers:{'Accept-Language':LANG}});
     const res = await r.json();
-    list.innerHTML = res.length ? res.map(x => `<button data-lat="${x.lat}" data-lng="${x.lon}" data-bb="${esc((x.boundingbox || []).join(','))}">${esc(x.display_name)}</button>`).join('') : '<button disabled>Nothing found</button>';
-  }catch{ list.innerHTML = '<button disabled>Place search needs a connection</button>'; }
+    list.innerHTML = res.length ? res.map(x => `<button data-lat="${x.lat}" data-lng="${x.lon}" data-bb="${esc((x.boundingbox || []).join(','))}">${esc(x.display_name)}</button>`).join('') : '<button disabled>' + T`Nothing found` + '</button>';
+  }catch{ list.innerHTML = '<button disabled>' + T`Place search needs a connection` + '</button>'; }
 };
 $('#placeList').addEventListener('click', e => {
   const b = e.target.closest('button[data-lat]'); if(!b) return;
@@ -2021,16 +2084,17 @@ $('#placeList').addEventListener('click', e => {
 $('#placeQ').addEventListener('blur', () => setTimeout(() => $('#placeList').classList.add('hidden'), 250));
 
 /* ---------------- boot ---------------- */
-window.addEventListener('online', () => toast('Back online'));
-window.addEventListener('offline', () => toast('Offline — saved routes and offline maps still work'));
+window.addEventListener('online', () => toast(T`Back online`));
+window.addEventListener('offline', () => toast(T`Offline — saved routes and offline maps still work`));
 if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost'))
   navigator.serviceWorker.register('sw.js').catch(() => {});   // optional companion file for offline reloads + install
 (async () => {
+  applyStaticI18n();
   show('explore');
   const nav = LS.get('nav', null);            // resume an interrupted navigation
   if(nav?.id){
     const x = await dbGet('tracks', nav.id).catch(() => null);
-    if(x){ const t = prepTrack(x); t.saved = true; S.current = t; drawTrack(t); toast('Resuming navigation'); startNav(t); }
+    if(x){ const t = prepTrack(x); t.saved = true; S.current = t; drawTrack(t); toast(T`Resuming navigation`); startNav(t); }
     else LS.del('nav');
   }
 })();
