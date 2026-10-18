@@ -686,7 +686,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
-button,input,select{font:inherit;color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
 #map{position:fixed;inset:0;background:#dcd8cc}
 @media (prefers-color-scheme:dark){#map{background:#2a2f2c}}
 .hidden{display:none!important}
@@ -864,6 +864,32 @@ h3{font-size:13px;margin:16px 0 8px;color:var(--muted);text-transform:uppercase;
 .kv:last-child{border-bottom:0}
 .switch{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0}
 .switch input{width:22px;height:22px;accent-color:var(--accent)}
+/* track editor */
+textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:9px 10px;outline:none;resize:vertical;line-height:1.4}
+.ecycle{display:flex;align-items:center;gap:8px;margin:2px 0 4px}
+.ecycle .iconbtn{width:48px;height:44px}
+.ecycle .lbl{flex:1;text-align:center;font-weight:700;font-size:14px}
+.etool{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.etool .btn{flex-direction:column;gap:3px;font-size:12px;min-height:56px;padding:6px 2px}
+.epad{display:flex;align-items:center;justify-content:center;gap:10px;height:104px;border-radius:14px;border:2px dashed var(--line);background:var(--panel2);color:var(--muted);font-size:14px;font-weight:600;text-align:center;padding:0 12px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.epad svg{width:26px;height:26px;flex:none}
+.epad small{display:block;font-weight:400;font-size:12px;margin-top:2px}
+.epad.on{border-color:var(--track);color:var(--ink);background:color-mix(in srgb,var(--track) 10%,var(--panel2))}
+.seg{display:flex;gap:3px;background:var(--panel2);border-radius:10px;padding:3px}
+.seg button{flex:1;border:0;background:none;border-radius:8px;padding:9px 2px;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer;min-width:0}
+.seg button.on{background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.seg button.on:not([class*=g-]){color:var(--ink)}
+.epin{width:34px;height:34px;display:grid;place-items:center}
+.epin i{width:15px;height:15px;border-radius:50%;background:#fff;border:3px solid var(--track);box-shadow:0 1px 3px rgba(0,0,0,.45);box-sizing:border-box}
+.epin.named i{border-radius:4px;width:17px;height:17px}
+.epin.s i{background:#2e7d4f;border-color:#fff;width:18px;height:18px}
+.epin.e i{background:#1d2420;border-color:#fff;width:18px;height:18px}
+.epin.sel i{width:22px;height:22px;background:var(--track);border-color:#fff;box-shadow:0 0 0 5px color-mix(in srgb,var(--track) 35%,transparent),0 1px 4px rgba(0,0,0,.5)}
+.eghost{width:30px;height:30px;display:grid;place-items:center}
+.eghost i{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.92);border:2px solid var(--track);color:var(--track);font:800 15px/16px system-ui,sans-serif;font-style:normal;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.ehandle{width:60px;height:60px;display:grid;place-items:center;touch-action:none}
+.ehandle i{width:46px;height:46px;border-radius:50%;background:var(--track);border:3px solid #fff;color:#fff;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.45)}
+.ehandle svg{width:24px;height:24px}
 </style>
 </head>
 <body>
@@ -1159,8 +1185,8 @@ function prepTrack(t){
   }
   t.length = n ? t.cum[n-1] : 0;
   if(t.distance == null) t.distance = t.length;
-  if(t.up == null) t.up = Math.round(up);
-  if(t.down == null) t.down = Math.round(down);
+  if(t.up == null && t.hasEle) t.up = Math.round(up);
+  if(t.down == null && t.hasEle) t.down = Math.round(down);
   let s=90, w=180, nn=-90, e=-180; for(const q of p){ if(q[0]<s)s=q[0]; if(q[0]>nn)nn=q[0]; if(q[1]<w)w=q[1]; if(q[1]>e)e=q[1]; }
   t.bbox = [s, w, nn, e];
   return t;
@@ -1332,9 +1358,10 @@ function toGPX(t){
   const pts = t.pts.map(p => `<trkpt lat="${p[0].toFixed(6)}" lon="${p[1].toFixed(6)}">${p[2] != null ? `<ele>${(+p[2]).toFixed(1)}</ele>` : ''}</trkpt>`).join('\n      ');
   return `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Padvinder" xmlns="http://www.topografix.com/GPX/1/1">
-  <metadata><name>${x(t.name)}</name>${t.komootId ? `<link href="${x(komootUrl(t))}"><text>Komoot</text></link>` : ''}</metadata>
+  <metadata><name>${x(t.name)}</name>${t.desc?.text ? `<desc>${x(t.desc.text)}</desc>` : ''}${t.komootId ? `<link href="${x(komootUrl(t))}"><text>Komoot</text></link>` : ''}</metadata>${(t.highlights || []).filter(h => h.ll).map(h => `
+  <wpt lat="${(+h.ll[0]).toFixed(6)}" lon="${(+h.ll[1]).toFixed(6)}"><name>${x(h.name)}</name>${h.intro ? `<desc>${x(h.intro)}</desc>` : ''}</wpt>`).join('')}
   <trk>
-    <name>${x(t.name)}</name>
+    <name>${x(t.name)}</name>${t.desc?.text ? `<desc>${x(t.desc.text)}</desc>` : ''}${t.sport ? `<type>${x(t.sport)}</type>` : ''}
     <trkseg>
       ${pts}
     </trkseg>
@@ -1486,16 +1513,16 @@ document.querySelectorAll('#tabs button').forEach(b => {
 $('#btnLocate').innerHTML = ic('locate');
 
 function show(v, opts = {}){
-  if(!['detail', 'nav', 'help'].includes(v)) S.prevView = v;
+  if(!['detail', 'nav', 'help', 'edit'].includes(v)) S.prevView = v;
   S.view = v;
   document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === v));
-  $('#tabs').classList.toggle('hidden', ['detail', 'nav', 'help'].includes(v));
+  $('#tabs').classList.toggle('hidden', ['detail', 'nav', 'help', 'edit'].includes(v));
   if(sheet.classList.contains('peek') && !opts.keepPeek) setSheet('');
   render();
   body.scrollTop = 0;
 }
 function render(){
-  ({explore:renderExplore, library:renderLibrary, settings:renderSettings, detail:renderDetail, nav:renderNav, help:renderHelp})[S.view]();
+  ({explore:renderExplore, library:renderLibrary, settings:renderSettings, detail:renderDetail, nav:renderNav, help:renderHelp, edit:renderEdit})[S.view]();
 }
 
 /* ---------------- explore ---------------- */
@@ -1631,7 +1658,7 @@ async function renderDetail(){
     <div class="stat"><b>${fmtKm(t.distance)}</b><span>${T`distance`}</span></div>
     <div class="stat"><b>${t.up != null ? Math.round(t.up) + ' m' : '–'}</b><span>${T`ascent`}</span></div>
     <div class="stat"><b>${fmtDur(t.duration || (t.distance / (SPORTS[t.sport]?.kmh || 4.5) * 3.6))}</b><span>${T`time`}</span></div>
-    <div class="stat"><b class="g-${esc(t.grade || '')}" style="font-size:14px;line-height:21px">${esc(t.grade ? tt(t.grade) : (t.source === 'gpx' ? 'GPX' : '–'))}</b><span>${t.grade ? T`grade` : T`source`}</span></div></div>`;
+    <div class="stat"><b class="g-${esc(t.grade || '')}" style="font-size:14px;line-height:21px">${esc(t.grade ? tt(t.grade) : (t.source === 'gpx' ? 'GPX' : t.source === 'drawn' ? T`Drawn` : '–'))}</b><span>${t.grade ? T`grade` : T`source`}</span></div></div>`;
   if(t.loading){ body.innerHTML = head + stats + `<div class="empty"><span class="spin"></span><br>${T`Loading route…`}</div>`; return; }
   const saved = await isSaved(t); t.saved = saved;
   if(S.view !== 'detail' || S.current !== t) return;
@@ -1646,6 +1673,7 @@ async function renderDetail(){
       <button class="btn" data-act="share">${ic('share')}${T`Share GPX`}</button>
       <button class="btn" data-act="gmaps">${ic('car')}${T`Drive to start`}</button>
       <button class="btn" data-act="reverse">${ic('swap')}${T`Reverse`}</button>
+      ${t.source === 'drawn' ? `<button class="btn" data-act="edit">${ic('pen')}${T`Edit track`}</button>` : ''}
       ${t.komootId ? `<button class="btn" data-act="komoot">${ic('ext')}Komoot</button>` : ''}
       ${saved ? `<button class="btn danger" data-act="delete">${ic('trash')}${T`Delete`}</button>` : ''}
     </div>
@@ -1882,14 +1910,17 @@ function renderHelp(){
 async function renderLibrary(){
   const all = (await dbAll('tracks')).sort((a, b) => b.created - a.created);
   if(S.view !== 'library') return;
+  const draft = LS.get('draft', null);
   body.innerHTML = `
-    <div class="grid2">
+    <button class="btn primary block" data-act="drawNew">${ic('pen')}${T`Draw a route`}</button>
+    ${draft?.anchors?.length ? `<button class="btn block" data-act="drawResume" style="margin-top:8px">${ic('undo')}${T`Continue drawing (${draft.anchors.length} points)`}</button>` : ''}
+    <div class="grid2" style="margin-top:8px">
       <button class="btn" data-act="importGpx">${ic('up')}${T`Import GPX`}</button>
       <button class="btn" data-act="importLink">${ic('link')}${T`Komoot link`}</button>
     </div>
     <form id="linkForm" class="row hidden" style="margin-top:8px"><input type="url" id="linkIn" placeholder="${T`komoot.com/tour/… or tour ID`}" style="flex:1"><button class="btn primary">${T`Load`}</button></form>
     <div class="cards">${all.length ? all.map(t => `<button class="card" data-act="openSaved" data-id="${esc(t.id)}">
-      <div class="grow"><div class="t">${esc(t.name)}</div><div class="m">${fmtKm(t.distance)}${t.up != null ? ` · ↑${t.up} m` : ''} · ${t.source === 'gpx' ? 'GPX' : 'Komoot'} · ${new Date(t.created).toLocaleDateString(LANG)}</div></div>
+      <div class="grow"><div class="t">${esc(t.name)}</div><div class="m">${fmtKm(t.distance)}${t.up != null ? ` · ↑${t.up} m` : ''} · ${t.source === 'gpx' ? 'GPX' : t.source === 'drawn' ? T`Drawn` : 'Komoot'} · ${new Date(t.created).toLocaleDateString(LANG)}</div></div>
       ${t.offline?.pid ? '<span class="badge off">offline</span>' : ''}</button>`).join('') : `<div class="empty">${T`No saved routes yet.`}<br>${T`Save one from Explore, or import a GPX.`}</div>`}</div>`;
   $('#linkForm').onsubmit = e => { e.preventDefault(); importLink($('#linkIn').value); };
 }
@@ -2215,6 +2246,415 @@ map.on('dragstart', () => { if(S.nav && S.follow){ S.follow = false; const r = $
 let pkTap = 0;
 $('#pocket').addEventListener('click', () => { const now = Date.now(); if(now - pkTap < 400){ $('#pocket').classList.add('hidden'); pkTap = 0; } else pkTap = now; });
 
+/* ---------------- draw / edit tracks ----------------
+   Anchors (the points you place) are kept on the track as t.anchors, so a drawn route can be edited later.
+   On save the straight lines between anchors are densified, elevation is looked up (Open-Meteo, when online),
+   named anchors become highlights and turn hints are derived from the angles at the anchors.
+   Moving a point never needs a finger on top of it: a round handle sits a bit below (or above) the point,
+   and a slide pad in the sheet moves it at reduced speed for precision. */
+I.pen = '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>';
+I.undo = '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>';
+I.plus = '<path d="M12 5v14M5 12h14"/>';
+I.loop = '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>';
+I.next = '<path d="m9 18 6-6-6-6"/>';
+I.move = '<path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/>';
+I.check = '<path d="M5 12.5l4.5 4.5L19 7.5"/>';
+I.x = '<path d="M6 6l12 12M18 6 6 18"/>';
+
+Object.assign(I18N.nl ||= {}, {
+  'Draw a route':'Route tekenen', 'Continue drawing ({0} points)':'Verder tekenen ({0} punten)',
+  'Start a new route? Your unfinished drawing will be discarded.':'Nieuwe route beginnen? Je onafgemaakte tekening gaat verloren.',
+  'Edit track':'Route bewerken', 'New track':'Nieuwe route', 'Next':'Verder', 'Previous point':'Vorig punt', 'Next point':'Volgend punt',
+  'Tap the map to place the start':'Tik op de kaart om de start te plaatsen', 'Tap a point or use the arrows':'Tik op een punt of gebruik de pijlen',
+  'Point {0} of {1}':'Punt {0} van {1}',
+  'Tap the map to add points one after another. Tap a point to select and move it.':'Tik op de kaart om punten na elkaar toe te voegen. Tik op een punt om het te selecteren en te verplaatsen.',
+  'Tap the map to add the next point · tap + on a line to insert one':'Tik op de kaart voor het volgende punt · tik op + op een lijn om er een tussen te voegen',
+  'Undo':'Ongedaan', 'Close loop':'Rondje sluiten', 'Clear all':'Alles wissen', 'Remove all points?':'Alle punten verwijderen?',
+  'Slide here to move the point precisely':'Schuif hier om het punt precies te verplaatsen', 'or drag the round handle on the map':'of sleep de ronde greep op de kaart',
+  'Name this point (optional, shows as a highlight)':'Naam voor dit punt (optioneel, wordt een highlight)',
+  'Insert':'Invoegen', 'Done':'Klaar', '{0} points':'{0} punten', 'points':'punten', 'Track details':'Routegegevens', 'Name':'Naam', 'Route name':'Naam van de route',
+  'Difficulty':'Moeilijkheid', 'not set':'geen', 'Description':'Beschrijving',
+  'Notes about the route, parking, things to look out for…':'Notities over de route, parkeren, waar je op moet letten…',
+  'My route':'Mijn route', 'Save track':'Route opslaan', 'Saving…':'Opslaan…',
+  'Elevation is looked up online when you save.':'Bij opslaan wordt de hoogte online opgezocht.',
+  'Offline: saved without elevation. Save it again when online to add it.':'Offline: opgeslagen zonder hoogte. Sla hem online nog eens op om die toe te voegen.',
+  'Elevation could not be loaded — saved without it':'Hoogte kon niet worden geladen — opgeslagen zonder',
+  'Track saved':'Route opgeslagen', 'Discard your changes?':'Wijzigingen weggooien?', 'Continuing where you left off':'Verder waar je gebleven was',
+  'Add at least two points':'Voeg minstens twee punten toe', 'Drawn':'Getekend',
+  'The route changed, so its offline map was removed — make it offline again':'De route is gewijzigd, dus de offline kaart is verwijderd — maak hem opnieuw offline',
+  'Direction reversed':'Richting omgedraaid', 'Back to drawing':'Terug naar tekenen'});
+Object.assign(I18N.de ||= {}, {
+  'Draw a route':'Route zeichnen', 'Continue drawing ({0} points)':'Weiterzeichnen ({0} Punkte)',
+  'Start a new route? Your unfinished drawing will be discarded.':'Neue Route beginnen? Deine unfertige Zeichnung wird verworfen.',
+  'Edit track':'Route bearbeiten', 'New track':'Neue Route', 'Next':'Weiter', 'Previous point':'Vorheriger Punkt', 'Next point':'Nächster Punkt',
+  'Tap the map to place the start':'Tippe auf die Karte, um den Start zu setzen', 'Tap a point or use the arrows':'Tippe auf einen Punkt oder nutze die Pfeile',
+  'Point {0} of {1}':'Punkt {0} von {1}',
+  'Tap the map to add points one after another. Tap a point to select and move it.':'Tippe auf die Karte, um Punkte nacheinander hinzuzufügen. Tippe auf einen Punkt, um ihn auszuwählen und zu verschieben.',
+  'Tap the map to add the next point · tap + on a line to insert one':'Tippe auf die Karte für den nächsten Punkt · tippe auf + auf einer Linie zum Einfügen',
+  'Undo':'Rückgängig', 'Close loop':'Runde schließen', 'Clear all':'Alles löschen', 'Remove all points?':'Alle Punkte entfernen?',
+  'Slide here to move the point precisely':'Hier wischen, um den Punkt genau zu verschieben', 'or drag the round handle on the map':'oder den runden Griff auf der Karte ziehen',
+  'Name this point (optional, shows as a highlight)':'Name für diesen Punkt (optional, wird ein Highlight)',
+  'Insert':'Einfügen', 'Done':'Fertig', '{0} points':'{0} Punkte', 'points':'Punkte', 'Track details':'Routendaten', 'Name':'Name', 'Route name':'Name der Route',
+  'Difficulty':'Schwierigkeit', 'not set':'keine', 'Description':'Beschreibung',
+  'Notes about the route, parking, things to look out for…':'Notizen zur Route, Parken, worauf man achten sollte…',
+  'My route':'Meine Route', 'Save track':'Route speichern', 'Saving…':'Speichern…',
+  'Elevation is looked up online when you save.':'Beim Speichern wird die Höhe online abgefragt.',
+  'Offline: saved without elevation. Save it again when online to add it.':'Offline: ohne Höhe gespeichert. Speichere sie online erneut, um sie zu ergänzen.',
+  'Elevation could not be loaded — saved without it':'Höhe konnte nicht geladen werden — ohne gespeichert',
+  'Track saved':'Route gespeichert', 'Discard your changes?':'Änderungen verwerfen?', 'Continuing where you left off':'Weiter, wo du aufgehört hast',
+  'Add at least two points':'Füge mindestens zwei Punkte hinzu', 'Drawn':'Gezeichnet',
+  'The route changed, so its offline map was removed — make it offline again':'Die Route wurde geändert, daher wurde die Offline-Karte entfernt — speichere sie erneut offline',
+  'Direction reversed':'Richtung umgedreht', 'Back to drawing':'Zurück zum Zeichnen'});
+Object.assign(I18N.fr ||= {}, {
+  'Draw a route':'Tracer un itinéraire', 'Continue drawing ({0} points)':'Continuer le tracé ({0} points)',
+  'Start a new route? Your unfinished drawing will be discarded.':'Commencer un nouvel itinéraire ? Le tracé inachevé sera perdu.',
+  'Edit track':'Modifier l’itinéraire', 'New track':'Nouvel itinéraire', 'Next':'Suivant', 'Previous point':'Point précédent', 'Next point':'Point suivant',
+  'Tap the map to place the start':'Touchez la carte pour placer le départ', 'Tap a point or use the arrows':'Touchez un point ou utilisez les flèches',
+  'Point {0} of {1}':'Point {0} sur {1}',
+  'Tap the map to add points one after another. Tap a point to select and move it.':'Touchez la carte pour ajouter des points l’un après l’autre. Touchez un point pour le sélectionner et le déplacer.',
+  'Tap the map to add the next point · tap + on a line to insert one':'Touchez la carte pour le point suivant · touchez + sur une ligne pour en insérer un',
+  'Undo':'Annuler', 'Close loop':'Fermer la boucle', 'Clear all':'Tout effacer', 'Remove all points?':'Supprimer tous les points ?',
+  'Slide here to move the point precisely':'Glissez ici pour déplacer le point avec précision', 'or drag the round handle on the map':'ou faites glisser la poignée ronde sur la carte',
+  'Name this point (optional, shows as a highlight)':'Nom de ce point (facultatif, devient un point fort)',
+  'Insert':'Insérer', 'Done':'OK', '{0} points':'{0} points', 'points':'points', 'Track details':'Détails de l’itinéraire', 'Name':'Nom', 'Route name':'Nom de l’itinéraire',
+  'Difficulty':'Difficulté', 'not set':'aucune', 'Description':'Description',
+  'Notes about the route, parking, things to look out for…':'Notes sur l’itinéraire, le parking, les points d’attention…',
+  'My route':'Mon itinéraire', 'Save track':'Enregistrer', 'Saving…':'Enregistrement…',
+  'Elevation is looked up online when you save.':'L’altitude est récupérée en ligne à l’enregistrement.',
+  'Offline: saved without elevation. Save it again when online to add it.':'Hors ligne : enregistré sans altitude. Enregistrez-le à nouveau en ligne pour l’ajouter.',
+  'Elevation could not be loaded — saved without it':'Altitude indisponible — enregistré sans',
+  'Track saved':'Itinéraire enregistré', 'Discard your changes?':'Abandonner les modifications ?', 'Continuing where you left off':'Reprise là où vous vous étiez arrêté',
+  'Add at least two points':'Ajoutez au moins deux points', 'Drawn':'Tracé',
+  'The route changed, so its offline map was removed — make it offline again':'L’itinéraire a changé, la carte hors ligne a donc été supprimée — rendez-le à nouveau hors ligne',
+  'Direction reversed':'Sens inversé', 'Back to drawing':'Retour au tracé'});
+{ const DRAW_HELP = {
+  en:['Draw your own route','<ul><li>Under <b>Saved</b>, tap <b>Draw a route</b>. Tap the map to place points one after another; the line follows your taps. Double-tap no longer zooms while drawing, so you can tap quickly.</li><li>Tap a point (or step through them with ◀ ▶) to select it. Move it with the <b>round handle</b> just below it, or slide a finger over the <b>pad</b> in the panel for slow, precise moves — your finger never covers the point.</li><li>Tap <b>+</b> halfway along a line to insert a point there. Give a point a name and it shows up as a highlight along the way.</li><li><b>Next</b> takes you to name, activity, difficulty and description. On save, elevation is looked up (when online) and turn hints are made from the bends at your points.</li><li>Your drawing is kept while you work, so you can close the app and continue later. Drawn routes have an <b>Edit track</b> button.</li></ul>'],
+  nl:['Zelf een route tekenen','<ul><li>Tik onder <b>Opgeslagen</b> op <b>Route tekenen</b>. Tik op de kaart om punten na elkaar te plaatsen; de lijn volgt je tikken. Dubbeltikken zoomt tijdens het tekenen niet, dus je kunt snel tikken.</li><li>Tik op een punt (of loop er met ◀ ▶ doorheen) om het te selecteren. Verplaats het met de <b>ronde greep</b> er net onder, of schuif met een vinger over het <b>vlak</b> in het paneel voor langzame, precieze verschuivingen — je vinger bedekt het punt nooit.</li><li>Tik op <b>+</b> halverwege een lijn om daar een punt in te voegen. Geef een punt een naam en het verschijnt als highlight onderweg.</li><li><b>Verder</b> brengt je naar naam, activiteit, moeilijkheid en beschrijving. Bij opslaan wordt de hoogte opgezocht (als je online bent) en worden afslaginstructies gemaakt uit de bochten bij je punten.</li><li>Je tekening wordt bewaard terwijl je werkt, dus je kunt de app sluiten en later verdergaan. Getekende routes hebben een knop <b>Route bewerken</b>.</li></ul>'],
+  de:['Eigene Route zeichnen','<ul><li>Tippe unter <b>Gespeichert</b> auf <b>Route zeichnen</b>. Tippe auf die Karte, um Punkte nacheinander zu setzen; die Linie folgt deinen Tipps. Doppeltippen zoomt beim Zeichnen nicht, du kannst also schnell tippen.</li><li>Tippe auf einen Punkt (oder gehe sie mit ◀ ▶ durch), um ihn auszuwählen. Verschiebe ihn mit dem <b>runden Griff</b> direkt darunter oder wische über das <b>Feld</b> im Panel für langsame, genaue Bewegungen — dein Finger verdeckt den Punkt nie.</li><li>Tippe auf <b>+</b> in der Mitte einer Linie, um dort einen Punkt einzufügen. Gib einem Punkt einen Namen, dann erscheint er als Highlight unterwegs.</li><li><b>Weiter</b> führt zu Name, Aktivität, Schwierigkeit und Beschreibung. Beim Speichern wird die Höhe abgefragt (online) und aus den Knicken an deinen Punkten werden Abbiegehinweise.</li><li>Deine Zeichnung bleibt beim Arbeiten erhalten, du kannst die App schließen und später weitermachen. Gezeichnete Routen haben einen Knopf <b>Route bearbeiten</b>.</li></ul>'],
+  fr:['Tracer votre itinéraire','<ul><li>Dans <b>Enregistrés</b>, touchez <b>Tracer un itinéraire</b>. Touchez la carte pour placer des points l’un après l’autre ; la ligne suit vos touches. Le double appui ne zoome pas pendant le tracé, vous pouvez donc toucher rapidement.</li><li>Touchez un point (ou parcourez-les avec ◀ ▶) pour le sélectionner. Déplacez-le avec la <b>poignée ronde</b> juste en dessous, ou glissez un doigt sur la <b>zone</b> du panneau pour des déplacements lents et précis — votre doigt ne cache jamais le point.</li><li>Touchez <b>+</b> au milieu d’une ligne pour y insérer un point. Donnez un nom à un point et il apparaît comme point fort.</li><li><b>Suivant</b> mène au nom, à l’activité, à la difficulté et à la description. À l’enregistrement, l’altitude est récupérée (en ligne) et des indications de direction sont créées à partir des virages à vos points.</li><li>Votre tracé est conservé pendant le travail : vous pouvez fermer l’application et continuer plus tard. Les itinéraires tracés ont un bouton <b>Modifier l’itinéraire</b>.</li></ul>']};
+  for(const k in DRAW_HELP) HELP[k]?.sections?.splice(3, 0, DRAW_HELP[k]);
+}
+
+const editLayer = L.layerGroup().addTo(map);
+const PAD_GAIN = .4;                     // slide pad: 10 px of finger = 4 px of point
+const HANDLE_GAP = 80;                   // px between a point and its drag handle
+const toLL = l => Array.isArray(l) ? [+(+l[0]).toFixed(6), +(+l[1]).toFixed(6)] : [+l.lat.toFixed(6), +l.lng.toFixed(6)];
+let edLine = null, edCase = null, edGhosts = null, edMarks = [], edHandle = null, edTether = null, edOff = null, edBusy = false, draftT;
+
+function startEdit(orig, draft){
+  if(S.nav) return;
+  const src = draft || (orig ? {id:orig.id, origId:orig.id, anchors:orig.anchors || [],
+    meta:{name:orig.name || '', sport:orig.sport || 'hike', grade:orig.grade || '', desc:orig.desc?.text || ''}} : null);
+  S.edit = {id:src?.id || null, origId:src?.origId || null,
+    anchors:(src?.anchors || []).map(a => a.name ? {ll:toLL(a.ll), name:a.name} : {ll:toLL(a.ll)}),
+    meta:Object.assign({name:'', sport:SPORTS[settings.sport] ? settings.sport : 'hike', grade:'', desc:''}, src?.meta),
+    sel:null, hist:[], step:'draw', dirty:!!draft, saving:false};
+  closePoi(); trackLayer.clearLayers(); map.removeLayer(resultsLayer); map.doubleClickZoom.disable();
+  show('edit'); setSheet('');
+  drawEdit();
+  const a = S.edit.anchors;
+  if(a.length > 1) setTimeout(() => map.fitBounds(L.latLngBounds(a.map(x => x.ll)), {paddingTopLeft:[30, 90], paddingBottomRight:[30, sheet.offsetHeight + 40], maxZoom:17}), 30);
+  else if(a.length) map.panTo(a[0].ll);
+}
+function endEdit(){
+  clearTimeout(draftT); S.edit = null; LS.del('draft');
+  editLayer.clearLayers(); edMarks = []; edHandle = edTether = edGhosts = edLine = edCase = null;
+  map.doubleClickZoom.enable(); if(!map.hasLayer(resultsLayer)) resultsLayer.addTo(map);
+}
+function saveDraft(){
+  clearTimeout(draftT);
+  draftT = setTimeout(() => { const e = S.edit; if(e?.dirty) LS.set('draft', {id:e.id, origId:e.origId, anchors:e.anchors, meta:e.meta, at:Date.now()}); }, 250);
+}
+function editChanged(){ S.edit.dirty = true; saveDraft(); }
+function editPush(){ const e = S.edit; e.hist.push(JSON.stringify({a:e.anchors, s:e.sel})); if(e.hist.length > 200) e.hist.shift(); }
+function editUndo(){
+  const e = S.edit, h = e.hist.pop(); if(!h) return;
+  const o = JSON.parse(h); e.anchors = o.a; e.sel = o.s != null && o.s < e.anchors.length ? o.s : null;
+  editChanged(); drawEdit(); renderEdit();
+}
+const editLen = (a = S.edit.anchors) => { let s = 0; for(let i = 1; i < a.length; i++) s += dist(a[i - 1].ll, a[i].ll); return s; };
+const isLoop = a => a.length > 2 && dist(a[0].ll, a[a.length - 1].ll) < 1;
+function edStatsText(){
+  const e = S.edit, n = e.anchors.length, len = editLen();
+  return `${fmtKm(len)} · ${T`${n} points`}${n > 1 ? ' · ~' + fmtDur(len / (SPORTS[e.meta.sport]?.kmh || 4.5) * 3.6) : ''}`;
+}
+
+/* map drawing */
+function pinIcon(i, n, sel, named){
+  const cls = ['epin', i === 0 ? 's' : '', i === n - 1 && n > 1 ? 'e' : '', sel ? 'sel' : '', named ? 'named' : ''].join(' ');
+  return L.divIcon({className:'', iconSize:[34, 34], html:`<div class="${cls}"><i></i></div>`});
+}
+function drawEdit(){
+  editLayer.clearLayers(); edMarks = []; edHandle = edTether = null;
+  const e = S.edit; if(!e) return;
+  const lls = e.anchors.map(a => a.ll);
+  edCase = L.polyline(lls, {color:'#fff', weight:9, opacity:.9, interactive:false}).addTo(editLayer);
+  edLine = L.polyline(lls, {color:TRACK_COLOR, weight:5, opacity:1, interactive:false}).addTo(editLayer);
+  edGhosts = L.layerGroup().addTo(editLayer); drawGhosts();
+  e.anchors.forEach((a, i) => {
+    if(i === lls.length - 1 && isLoop(e.anchors) && i !== e.sel){ edMarks.push(null); return; }   // loop end sits on the start
+    edMarks.push(L.marker(a.ll, {icon:pinIcon(i, lls.length, i === e.sel, !!a.name), zIndexOffset:i === e.sel ? 1000 : i === 0 ? 500 : 0, keyboard:false, bubblingMouseEvents:false})
+      .on('click', ev => { L.DomEvent.stop(ev); if(e.step !== 'draw'){ e.step = 'draw'; } selectPt(i === e.sel ? null : i); })
+      .addTo(editLayer));
+  });
+  placeHandle();
+}
+function drawGhosts(){
+  const e = S.edit; if(!e || !edGhosts) return; edGhosts.clearLayers();
+  if(e.step !== 'draw') return;
+  const a = e.anchors, b = map.getBounds().pad(.2);
+  for(let i = 1; i < a.length; i++){
+    if(!b.contains(a[i - 1].ll) && !b.contains(a[i].ll)) continue;
+    const p = map.latLngToLayerPoint(a[i - 1].ll), q = map.latLngToLayerPoint(a[i].ll);
+    if(p.distanceTo(q) < 60) continue;                 // too short to tap safely
+    const mid = map.layerPointToLatLng(p.add(q).divideBy(2));
+    L.marker(mid, {icon:L.divIcon({className:'', iconSize:[30, 30], html:'<div class="eghost"><i>+</i></div>'}), keyboard:false, bubblingMouseEvents:false})
+      .on('click', ev => { L.DomEvent.stop(ev); editPush(); e.anchors.splice(i, 0, {ll:toLL(mid)}); editChanged(); selectPt(i, false); })
+      .addTo(edGhosts);
+  }
+}
+function placeHandle(keepSide){
+  if(edHandle){ editLayer.removeLayer(edHandle); edHandle = null; }
+  if(edTether){ editLayer.removeLayer(edTether); edTether = null; }
+  const e = S.edit; if(!e || e.sel == null || e.step !== 'draw') return;
+  const a = e.anchors[e.sel], p = map.latLngToContainerPoint(a.ll), H = map.getSize().y - sheet.offsetHeight;
+  // handle below the point (the finger then sits under it); flip above when that would end up under the sheet
+  if(!keepSide || !edOff) edOff = L.point(0, p.y + HANDLE_GAP + 30 > H ? -HANDLE_GAP : HANDLE_GAP);
+  const hll = map.containerPointToLatLng(p.add(edOff));
+  edTether = L.polyline([a.ll, hll], {color:'#1d2420', weight:2, opacity:.75, dashArray:'3 5', interactive:false}).addTo(editLayer);
+  edHandle = L.marker(hll, {draggable:true, autoPan:true, autoPanPadding:[50, 70], zIndexOffset:2000, keyboard:false, bubblingMouseEvents:false,
+    icon:L.divIcon({className:'', iconSize:[60, 60], html:`<div class="ehandle"><i>${ic('move')}</i></div>`})}).addTo(editLayer);
+  edHandle.on('click', ev => L.DomEvent.stop(ev))
+    .on('dragstart', () => { editPush(); edBusy = true; edGhosts?.clearLayers(); })
+    .on('drag', () => { const q = map.latLngToContainerPoint(edHandle.getLatLng()).subtract(edOff); moveSel(map.containerPointToLatLng(q)); })
+    .on('dragend', () => { edBusy = false; editChanged(); drawEdit(); updEditStats(); });
+}
+function moveSel(ll){
+  const e = S.edit, a = e.anchors[e.sel], loop = e.sel === 0 && isLoop(e.anchors);
+  a.ll = toLL(ll);
+  if(loop) e.anchors[e.anchors.length - 1].ll = [...a.ll];        // a closed loop stays closed
+  const lls = e.anchors.map(x => x.ll); edLine?.setLatLngs(lls); edCase?.setLatLngs(lls);
+  edMarks[e.sel]?.setLatLng(a.ll);
+  if(edHandle) edTether?.setLatLngs([a.ll, edHandle.getLatLng()]);
+}
+function movePx(dx, dy){
+  const e = S.edit; if(e?.sel == null) return;
+  const p = map.latLngToContainerPoint(e.anchors[e.sel].ll).add(L.point(dx, dy));
+  edHandle?.setLatLng(map.containerPointToLatLng(p.add(edOff || L.point(0, 0))));
+  moveSel(map.containerPointToLatLng(p));
+  // keep the point inside the visible part of the map
+  const sz = map.getSize(), H = sz.y - sheet.offsetHeight, m = 40; let px = 0, py = 0;
+  if(p.x < m) px = p.x - m; else if(p.x > sz.x - m) px = p.x - sz.x + m;
+  if(p.y < 90) py = p.y - 90; else if(p.y > H - m) py = p.y - H + m;
+  if(px || py) map.panBy([px, py], {animate:false});
+}
+function ensureVisible(ll){
+  const p = map.latLngToContainerPoint(ll), sz = map.getSize(), H = sz.y - sheet.offsetHeight;
+  const top = 90, bot = H - HANDLE_GAP - 30;
+  if(p.x < 40 || p.x > sz.x - 40 || p.y < top || p.y > Math.max(top + 40, bot))
+    map.panBy([p.x - sz.x / 2, p.y - (top + Math.max(top + 40, bot)) / 2], {animate:true, duration:.25});
+}
+function selectPt(i, pan = true){
+  const e = S.edit; e.sel = i;
+  renderEdit(); drawEdit();
+  if(i != null && pan) ensureVisible(e.anchors[i].ll);
+}
+function updEditStats(){ const s = $('#edStats'); if(s && S.edit) s.textContent = edStatsText(); }
+
+map.on('click', ev => {
+  const e = S.edit; if(!e || S.view !== 'edit' || e.step !== 'draw' || e.saving) return;
+  if(e.sel != null){ selectPt(null, false); return; }        // first tap after editing a point just deselects
+  editPush(); e.anchors.push({ll:toLL(ev.latlng)}); editChanged(); drawEdit(); renderEdit();
+});
+map.on('zoomend', () => { if(S.edit && !edBusy) drawGhosts(); });
+map.on('moveend', () => { if(S.edit && !edBusy){ placeHandle(); drawGhosts(); } });
+
+/* sheet */
+function renderEdit(){
+  const e = S.edit; if(!e) return show('library');
+  if(e.step === 'meta') return renderEditMeta();
+  const n = e.anchors.length, s = e.sel, canUndo = e.hist.length > 0;
+  let h = `<div class="dhead"><button class="iconbtn" data-act="edCancel" aria-label="${T`Close`}">${ic('x')}</button>
+    <div style="flex:1;min-width:0"><h2>${e.origId ? T`Edit track` : T`New track`}</h2><div class="hint" id="edStats" style="margin:2px 0 0">${edStatsText()}</div></div>
+    <button class="btn primary" data-act="edNext" ${n < 2 ? 'disabled' : ''}>${T`Next`}${ic('next')}</button></div>
+    <div class="ecycle">
+      <button class="iconbtn" data-act="edPrevPt" ${n ? '' : 'disabled'} aria-label="${T`Previous point`}">${ic('back')}</button>
+      <div class="lbl">${s == null ? (n ? T`Tap a point or use the arrows` : T`Tap the map to place the start`) : T`Point ${s + 1} of ${n}`}</div>
+      <button class="iconbtn" data-act="edNextPt" ${n ? '' : 'disabled'} aria-label="${T`Next point`}">${ic('next')}</button></div>`;
+  if(s == null){
+    h += `<div class="hint" style="text-align:center">${n ? T`Tap the map to add the next point · tap + on a line to insert one` : T`Tap the map to add points one after another. Tap a point to select and move it.`}</div>
+      <div class="etool">
+        <button class="btn" data-act="edUndo" ${canUndo ? '' : 'disabled'}>${ic('undo')}${T`Undo`}</button>
+        <button class="btn" data-act="edLoop" ${n > 2 && !isLoop(e.anchors) ? '' : 'disabled'}>${ic('loop')}${T`Close loop`}</button>
+        <button class="btn" data-act="edReverse" ${n > 1 ? '' : 'disabled'}>${ic('swap')}${T`Reverse`}</button>
+        <button class="btn danger" data-act="edClear" ${n ? '' : 'disabled'}>${ic('trash')}${T`Clear all`}</button></div>`;
+  } else {
+    const a = e.anchors[s];
+    h += `<div class="epad" id="edPad">${ic('move')}<div>${T`Slide here to move the point precisely`}<small>${T`or drag the round handle on the map`}</small></div></div>
+      <input type="text" id="edPtName" maxlength="80" placeholder="${T`Name this point (optional, shows as a highlight)`}" value="${esc(a.name || '')}" enterkeyhint="done" style="margin-top:8px">
+      <div class="etool" style="margin-top:8px">
+        <button class="btn" data-act="edUndo" ${canUndo ? '' : 'disabled'}>${ic('undo')}${T`Undo`}</button>
+        <button class="btn" data-act="edInsert">${ic('plus')}${T`Insert`}</button>
+        <button class="btn danger" data-act="edDelPt">${ic('trash')}${T`Delete`}</button>
+        <button class="btn primary" data-act="edDeselect">${ic('check')}${T`Done`}</button></div>`;
+  }
+  body.innerHTML = h;
+  const pad = $('#edPad');
+  if(pad){
+    let last = null;
+    pad.addEventListener('pointerdown', ev => { ev.preventDefault(); pad.setPointerCapture(ev.pointerId); last = [ev.clientX, ev.clientY]; editPush(); edBusy = true; pad.classList.add('on'); edGhosts?.clearLayers(); });
+    pad.addEventListener('pointermove', ev => { if(!last) return; const dx = ev.clientX - last[0], dy = ev.clientY - last[1]; last = [ev.clientX, ev.clientY]; movePx(dx * PAD_GAIN, dy * PAD_GAIN); });
+    const end = () => { if(!last) return; last = null; edBusy = false; pad.classList.remove('on'); editChanged(); drawEdit(); updEditStats(); };
+    pad.addEventListener('pointerup', end); pad.addEventListener('pointercancel', end);
+  }
+  const nm = $('#edPtName');
+  if(nm){
+    nm.oninput = () => { const a = e.anchors[e.sel]; if(!a) return; const v = nm.value.trim(); if(v) a.name = nm.value; else delete a.name;
+      editChanged(); edMarks[e.sel]?.setIcon(pinIcon(e.sel, e.anchors.length, true, !!v)); };
+    nm.onkeydown = ev => { if(ev.key === 'Enter') nm.blur(); };
+  }
+}
+function renderEditMeta(){
+  const e = S.edit, m = e.meta, len = editLen();
+  body.innerHTML = `<div class="dhead"><button class="iconbtn" data-act="edBackDraw" aria-label="${T`Back to drawing`}">${ic('back')}</button><h2 style="flex:1">${T`Track details`}</h2></div>
+    <div class="stats" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat"><b>${fmtKm(len)}</b><span>${T`distance`}</span></div>
+      <div class="stat"><b>${e.anchors.length}</b><span>${T`points`}</span></div>
+      <div class="stat"><b>${fmtDur(len / (SPORTS[m.sport]?.kmh || 4.5) * 3.6)}</b><span>${T`time`}</span></div></div>
+    <div class="field"><label for="edMName">${T`Name`}</label><input type="text" id="edMName" maxlength="120" placeholder="${T`Route name`}" value="${esc(m.name)}" enterkeyhint="done"></div>
+    <div class="field" style="margin-top:10px"><label for="edMSport">${T`Activity`}</label><select id="edMSport">${Object.entries(SPORTS).map(([k, v]) => `<option value="${k}" ${m.sport === k ? 'selected' : ''}>${tt(v.label)}</option>`).join('')}</select></div>
+    <div class="field" style="margin-top:10px"><label>${T`Difficulty`}</label><div class="seg">${['', 'easy', 'moderate', 'difficult'].map(g =>
+      `<button type="button" class="${m.grade === g ? 'on' : ''} ${g ? 'g-' + g : ''}" data-act="edGrade" data-g="${g}">${g ? tt(g) : T`not set`}</button>`).join('')}</div></div>
+    <div class="field" style="margin-top:10px"><label for="edMDesc">${T`Description`}</label><textarea id="edMDesc" rows="4" maxlength="4000" placeholder="${T`Notes about the route, parking, things to look out for…`}">${esc(m.desc)}</textarea></div>
+    <button class="btn primary block" data-act="edSave" style="margin-top:14px;height:52px;font-size:17px" ${e.saving ? 'disabled' : ''}>${e.saving ? '<span class="spin"></span> ' + T`Saving…` : ic('check') + T`Save track`}</button>
+    <div class="hint" style="text-align:center">${navigator.onLine ? T`Elevation is looked up online when you save.` : T`Offline: saved without elevation. Save it again when online to add it.`}</div>`;
+  $('#edMName').oninput = ev => { m.name = ev.target.value; editChanged(); };
+  $('#edMName').onkeydown = ev => { if(ev.key === 'Enter') ev.target.blur(); };
+  $('#edMSport').onchange = ev => { m.sport = ev.target.value; editChanged(); renderEditMeta(); };
+  $('#edMDesc').oninput = ev => { m.desc = ev.target.value; editChanged(); };
+}
+
+/* saving */
+function densify(anchors){
+  const a = anchors.map(x => x.ll); let total = 0; for(let i = 1; i < a.length; i++) total += dist(a[i - 1], a[i]);
+  const step = Math.max(25, total / 1500);           // ≤ ~1500 points → ≤ 15 elevation requests
+  const pts = [[a[0][0], a[0][1], null]], idx = [0];
+  for(let i = 1; i < a.length; i++){
+    const p = a[i - 1], q = a[i], n = Math.max(1, Math.ceil(dist(p, q) / step));
+    for(let k = 1; k <= n; k++){ const f = k / n; pts.push([+(p[0] + (q[0] - p[0]) * f).toFixed(6), +(p[1] + (q[1] - p[1]) * f).toFixed(6), null]); }
+    idx.push(pts.length - 1);
+  }
+  return {pts, idx};
+}
+async function addElevation(pts){
+  const B = 100, jobs = []; for(let i = 0; i < pts.length; i += B) jobs.push(i);
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 25000);
+  try{
+    const worker = async () => { while(jobs.length){
+      const i = jobs.shift(), part = pts.slice(i, i + B);
+      const r = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${part.map(p => p[0].toFixed(5)).join(',')}&longitude=${part.map(p => p[1].toFixed(5)).join(',')}`, {signal:ctl.signal});
+      if(!r.ok) throw new Error('elevation ' + r.status);
+      const j = await r.json(); (j.elevation || []).forEach((v, k) => { if(Number.isFinite(v) && pts[i + k]) pts[i + k][2] = Math.round(v * 10) / 10; });
+    } };
+    await Promise.all([worker(), worker(), worker()]);
+  }catch(err){ pts.forEach(p => p[2] = null); throw err; }
+  finally{ clearTimeout(to); }
+}
+function dirsFromAnchors(anchors, idx){       // turn hints from the bend at each point (Komoot direction codes)
+  const out = [];
+  for(let k = 1; k < anchors.length - 1; k++){
+    const a = anchors[k - 1].ll, b = anchors[k].ll, c = anchors[k + 1].ll;
+    if(dist(a, b) < 3 || dist(b, c) < 3) continue;
+    const d = ((bearing(b, c) - bearing(a, b)) % 360 + 540) % 360 - 180, x = Math.abs(d), side = d < 0 ? 'L' : 'R';
+    if(x < 30) continue;
+    out.push({i:idx[k], type:x > 165 ? 'TU' : x > 120 ? 'TS' + side : x > 55 ? 'T' + side : 'TL' + side, d:null, street:''});
+  }
+  return out.length ? out : null;
+}
+async function saveEdit(){
+  const e = S.edit; if(!e || e.saving) return;
+  if(e.anchors.length < 2){ toast(T`Add at least two points`); return; }
+  e.saving = true; renderEdit();
+  try{
+    const {pts, idx} = densify(e.anchors);
+    let eleMsg = null;
+    if(navigator.onLine){ try{ await addElevation(pts); }catch{ eleMsg = T`Elevation could not be loaded — saved without it`; } }
+    const orig = e.origId ? await dbGet('tracks', e.origId).catch(() => null) : null;
+    const t = {id:orig?.id || e.id || 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), source:'drawn',
+      name:e.meta.name.trim() || T`My route`, sport:e.meta.sport, pts, dirs:dirsFromAnchors(e.anchors, idx),
+      anchors:e.anchors.map((a, k) => a.name ? {ll:a.ll, i:idx[k], name:a.name.trim()} : {ll:a.ll, i:idx[k]}),
+      created:orig?.created || Date.now(), edited:Date.now()};
+    if(e.meta.grade) t.grade = e.meta.grade;
+    if(e.meta.desc.trim()) t.desc = {text:e.meta.desc.trim()};
+    const hls = t.anchors.filter(a => a.name).map(a => ({name:a.name, ll:a.ll, i:a.i}));
+    if(hls.length) t.highlights = hls;
+    if(orig?.color) t.color = orig.color;
+    let offMsg = null;
+    if(orig?.offline?.keys){ await releaseTiles(orig); offMsg = T`The route changed, so its offline map was removed — make it offline again`; }
+    prepTrack(t); await saveTrack(t); navigator.storage?.persist?.();
+    endEdit(); openTrack(t);
+    toast(offMsg || eleMsg || T`Track saved`, offMsg || eleMsg ? 4500 : 2000);
+  }catch(err){ if(S.edit){ e.saving = false; renderEdit(); } toast(err.message); }
+}
+
+/* actions */
+document.addEventListener('click', async ev => {
+  const el = ev.target.closest('[data-act]'); if(!el) return;
+  const a = el.dataset.act, e = S.edit;
+  switch(a){
+    case 'drawNew': {
+      const d = LS.get('draft', null);
+      if(d?.anchors?.length && !confirm(T`Start a new route? Your unfinished drawing will be discarded.`)) break;
+      LS.del('draft'); startEdit(null); break; }
+    case 'drawResume': {
+      const d = LS.get('draft', null); if(!d) break;
+      startEdit(null, d); toast(T`Continuing where you left off`); break; }
+    case 'edit': {
+      const t = S.current; if(!t || t.source !== 'drawn') break;
+      const d = LS.get('draft', null);
+      if(d?.origId === t.id){ startEdit(t, d); toast(T`Continuing where you left off`); break; }
+      if(d?.anchors?.length && !confirm(T`Start a new route? Your unfinished drawing will be discarded.`)) break;
+      LS.del('draft'); startEdit(t); break; }
+  }
+  if(!e) return;
+  switch(a){
+    case 'edCancel': {
+      if(e.dirty && e.anchors.length && !confirm(T`Discard your changes?`)) break;
+      const orig = e.origId ? await dbGet('tracks', e.origId).catch(() => null) : null;
+      endEdit();
+      if(orig){ const t = prepTrack(orig); t.saved = true; openTrack(t); } else show('library');
+      break; }
+    case 'edNext': if(e.anchors.length > 1){ e.step = 'meta'; e.sel = null; setSheet('full'); drawEdit(); renderEdit(); body.scrollTop = 0; } break;
+    case 'edBackDraw': e.step = 'draw'; setSheet(''); drawEdit(); renderEdit(); break;
+    case 'edPrevPt': case 'edNextPt': {
+      const n = e.anchors.length; if(!n) break;
+      const last = isLoop(e.anchors) ? n - 2 : n - 1;        // the loop end is the start again
+      const i = e.sel == null ? (a === 'edNextPt' ? 0 : last) : (e.sel + (a === 'edNextPt' ? 1 : -1) + last + 1) % (last + 1);
+      selectPt(i); break; }
+    case 'edUndo': editUndo(); break;
+    case 'edLoop': editPush(); e.anchors.push({ll:[...e.anchors[0].ll]}); editChanged(); drawEdit(); renderEdit(); break;
+    case 'edReverse': editPush(); e.anchors.reverse(); if(e.sel != null) e.sel = e.anchors.length - 1 - e.sel; editChanged(); drawEdit(); renderEdit(); break;
+    case 'edClear': if(!confirm(T`Remove all points?`)) break; editPush(); e.anchors = []; e.sel = null; editChanged(); drawEdit(); renderEdit(); break;
+    case 'edDeselect': selectPt(null, false); break;
+    case 'edDelPt': {
+      if(e.sel == null) break; editPush();
+      e.anchors.splice(e.sel, 1);
+      e.sel = e.anchors.length ? Math.min(e.sel, e.anchors.length - 1) : null;
+      editChanged(); selectPt(e.sel, false); break; }
+    case 'edInsert': {                                        // new point halfway to the next one, or a step further on at the end
+      if(e.sel == null) break; editPush();
+      const i = e.sel, p = e.anchors[i].ll, q = e.anchors[i + 1]?.ll;
+      let ll;
+      if(q) ll = map.layerPointToLatLng(map.latLngToLayerPoint(p).add(map.latLngToLayerPoint(q)).divideBy(2));
+      else { const prev = e.anchors[i - 1]?.ll, pp = map.latLngToContainerPoint(p);
+        const dir = prev ? pp.subtract(map.latLngToContainerPoint(prev)) : L.point(1, 0), len = Math.hypot(dir.x, dir.y) || 1;
+        ll = map.containerPointToLatLng(pp.add(L.point(dir.x / len * 60, dir.y / len * 60))); }
+      e.anchors.splice(i + 1, 0, {ll:toLL(ll)}); editChanged(); selectPt(i + 1); break; }
+    case 'edGrade': e.meta.grade = el.dataset.g; editChanged(); renderEditMeta(); break;
+    case 'edSave': saveEdit(); break;
+  }
+});
+
 /* ---------------- actions ---------------- */
 document.addEventListener('click', async e => {
   const el = e.target.closest('[data-act]'); if(!el) return;
@@ -2226,7 +2666,7 @@ document.addEventListener('click', async e => {
     case 'poiClose': closePoi(); break;
     case 'poiMap': { const x = S.current?.highlights?.[+el.dataset.k]; closePoi(); if(x?.ll){ if(S.nav){ S.follow = false; const r = $('#btnRecenter'); r.innerHTML = ic('compass') + T`Recenter`; r.classList.remove('hidden'); } map.setView(x.ll, Math.max(map.getZoom(), 17)); } break; }
     case 'help': if(!S.nav) show('help'); break;
-    case 'helpBack': show(S.prevView || 'explore'); break;
+    case 'helpBack': show(S.edit ? 'edit' : S.prevView || 'explore'); break;
     case 'install': if(deferredInstall){ deferredInstall.prompt(); try{ await deferredInstall.userChoice; }catch{} deferredInstall = null; render(); } break;
     case 'lbClose': $('#lightbox').classList.add('hidden'); $('#lbImg').src = ''; break;
     case 'lbPrev': openPhoto(lbIdx - 1); break;
@@ -2249,7 +2689,9 @@ document.addEventListener('click', async e => {
     case 'reverse': {
       const n0 = t.pts.length; t.pts = t.pts.slice().reverse(); t.dirs = null; const up = t.up; t.up = t.down; t.down = up;
       if(t.highlights) t.highlights = t.highlights.map(h => ({...h, i:h.i != null ? n0 - 1 - h.i : h.i})).reverse();
-      prepTrack(t); if(t.saved) await saveTrack(t); drawTrack(t); render(); t.reversed = !t.reversed; if(t.saved) await saveTrack(t); toast(T`Direction reversed (turn hints are off for reversed routes)`); break; }
+      if(t.source === 'drawn' && t.anchors){ t.anchors = t.anchors.slice().reverse().map(x => ({...x, i:n0 - 1 - x.i})); t.dirs = dirsFromAnchors(t.anchors, t.anchors.map(x => x.i)); }
+      prepTrack(t); drawTrack(t); render(); t.reversed = !t.reversed; if(t.saved) await saveTrack(t);
+      toast(t.dirs ? T`Direction reversed` : T`Direction reversed (turn hints are off for reversed routes)`); break; }
     case 'delete':
       if(!confirm(t.offline?.pid ? T`Delete “${t.name}” and its offline map?` : T`Delete “${t.name}”?`)) break;
       await releaseTiles(t); await dbDel('tracks', t.id); t.saved = false; delete t.offline; toast(T`Deleted`);
@@ -2300,7 +2742,7 @@ $('#placeList').addEventListener('click', e => {
   if(bb.length === 4 && bb.every(isFinite) && Math.abs(bb[1] - bb[0]) < 1) map.fitBounds([[bb[0], bb[2]], [bb[1], bb[3]]], {maxZoom:14});
   else map.setView([+b.dataset.lat, +b.dataset.lng], 13);
   $('#placeList').classList.add('hidden'); $('#placeQ').blur();
-  if(S.view !== 'explore') show('explore'); setTimeout(doSearch, 350);
+  if(!S.edit){ if(S.view !== 'explore') show('explore'); setTimeout(doSearch, 350); }
 });
 $('#placeQ').addEventListener('blur', () => setTimeout(() => $('#placeList').classList.add('hidden'), 250));
 
